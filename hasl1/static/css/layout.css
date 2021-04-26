@@ -1,0 +1,164 @@
+body {
+	padding-top: 70px;
+}
+
+.glyphicon {
+	line-height: inherit;
+}
+
+#example-sentences {
+	list-style: none;
+	padding: 0;
+}
+
+.bounding-box div {
+    border: 1px solid #ccc;
+}
+
+.panel-heading > .btn,
+.panel-heading > .btn-group {
+	float: right;
+	opacity: 1.0;
+	margin-top: 3px;
+	padding: 0 5px;
+}
+
+.panel-heading button.star-sentence {
+	float: left;
+	margin-left: -6px;
+}
+
+.panel-heading button.close {
+	padding: 0 0 0 5px;
+}
+
+.panel-heading > .btn-group {
+	padding: 0;
+}
+
+.btn-hidden {
+	border: 0;
+	background: transparent;
+	color: #bebebe;
+}
+
+.btn-hidden:hover {
+	color: #777;
+}
+
+.btn-group .btn-hidden.dropdown-toggle {
+	padding: 0 5px;
+}
+
+.btn-group.open .btn-hidden.dropdown-toggle {
+	box-shadow: none;
+}
+
+.btn-group .btn-hidden {
+	padding-right: 0;
+}
+
+.input-group-btn > .btn-overlay {
+	position: absolute;
+	right: 0;
+	z-index: 5;
+	background: transparent;
+}
+
+.input-group-btn > input[type=text].form-control {
+	padding-right: 30px;
+}
+
+.input-group-btn > .btn-overlay:hover,
+.input-group-btn > .btn-overlay:focus {
+	z-index: 5;
+}
+
+.parse-number {
+	float: left;
+	width: 20px;
+	line-height: 24px;
+}
+
+.history-dropdown {
+	width: 100%;
+}
+
+.dropdown-menu > li > a {
+	overflow:hidden;
+	text-overflow: ellipsis;
+}
+
+.dropdown-menu > li > label {
+	display: block;
+	padding: 3px 20px;
+	clear: both;
+	font-weight: 400;
+	line-height: 1.42857143;
+	color: #333;
+	white-space: nowrap
+}
+
+.dropdown-menu > li > label:focus,
+.dropdown-menu > li > label:hover {
+	color: #262626;
+	text-decoration: none;
+	background-color: #f5f5f5
+}
+
+.dropdown-menu > li > label > input[type=radio] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+.dropdown-menu > li > label > input[type=radio]::before {
+	content: '';
+	display: inline-block;
+	width: 1em;
+	padding-right: 14px;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	font-size: 0.75em;
+	margin-left: -10px;
+}
+
+.dropdown-menu > li > label > input[type=radio]:checked::before {
+	content: '\e013';
+}
+
+.popover-content > .list-group {
+	margin: -10px -15px;
+}
+
+.popover-content > .list-group > .list-group-item {
+	border: 0;
+	margin-bottom: 0;
+	border-bottom: 1px solid #ddd;
+}
+
+.popover-content > .list-group > .list-group-item:last-child {
+	border-bottom: 0;
+}
+
+.navbar-header,
+#navbar .navbar-nav {
+	display: none;
+}
+
+@media (min-width: 768px) {
+	.navbar-header,
+	#navbar .navbar-nav {
+		display: block;
+	}
+}
+
+#toast-list {
+	position: fixed;
+	bottom: 0;
+	right: 15px;
+}

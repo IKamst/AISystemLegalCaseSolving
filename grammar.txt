@@ -1,0 +1,91 @@
+; [[Someone is tresspassing] when [[they enter a house] and [they do not have permission]].]
+[[John is tresspassing] [because [he enters the house] and [he does not have permission]].]
+
+[[John is tresspassing] [because [[he enters the house] and [he does not have permission]]] [but [he has a key]].]
+
+[[Henry is a crook] because [he is a liar] and [liars are crooks].]
+[[Henry is a crook] because [he is a liar] and [a liar is a crook].]
+[[Henry is a crook] because [[someone is a crook] when [they are [a liar and a thief]]] and [Henry is [a liar and a thief]].]
+[[Henry is a crook] [because he is a liar and liars are crooks] [but [he is [kind and honest]]].]
+
+START: SENTENCE "."
+START: SENTENCES "and" SENTENCE "."
+
+SENTENCES: SENTENCE
+SENTENCES: SENTENCES "," SENTENCE
+
+; For example, John can fly because...
+SENTENCE: ARGCLAIM
+
+; For example, Someone is tresspassing when...
+; SENTENCE: RULE
+
+; ARGCLAIM is a CLAIM with optional supports or attacks
+ARGCLAIM: CLAIM SUPPORT ATTACK
+
+; CLAIM and STMT differ in that a CLAIM can consist of multiple STMT's.
+CLAIM: STMT
+CLAIM: STMT_LIST "and" STMT
+
+STMT_LIST: STMT
+STMT_LIST: STMT "," STMT_LIST
+
+STMT: INST VERB OBJ
+
+; Doubtful, because this is not about an instance
+STMT: RULE
+
+INST: "Someone" | "someone" | "one" | "they" | "he" | "it" | NAME
+
+NAME: "John" | "Henry" | "Albert" | "Bowie"
+
+UNSP_STMT: UNSP_INST_PL VERB_PL OBJ
+
+UNSP_INST_PL: "they" | NOUN_PL
+
+; Maybe "is" shouldnt be in this list, it behaves very differently
+VERB: "is"
+VERB: "enters"
+VERB: "has"
+; e.g. does not have, does not claim
+VERB: "does" "not" VERB_PL
+
+VERB_PL: "enter"
+VERB_PL: "have"
+VERB_PL: "are"
+VERB_PL: "do" "not" VERB_PL
+
+OBJ: "a" NOUN
+OBJ: "the" NOUN
+OBJ: "permission"
+OBJ: "kind"
+OBJ: "honest"
+OBJ: VERB_ING
+
+; e.g. a liar and a thief
+OBJ: OBJ "and" OBJ
+
+NOUN: "house" | "crook" | "thief" | "liar" | "bird" | "key"
+NOUN_PL: "houses" | "crooks" | "thieves" | "liars" | "birds" | "wings"
+
+VERB_ING: "tresspassing"
+
+RULE: STMT "when" COND
+RULE: OBJ VERB OBJ
+
+RULE: NOUN_PL "have" NOUN_PL
+RULE: NOUN_PL "are" NOUN_PL
+RULE: NOUN_PL "do" "not" "have" NOUN_PL
+RULE: NOUN_PL "are" "not" NOUN_PL
+
+; Right now a CLAIM and a COND are the same
+; No, not really because claim supports "A, B and C" instead of "A and B and C".
+COND: UNSP_STMT
+COND: UNSP_STMT "and" COND
+
+SUPPORT:
+SUPPORT: "because" ARGCLAIM
+SUPPORT: SUPPORT "and" SUPPORT
+
+ATTACK:
+ATTACK: "but" ARGCLAIM

@@ -1,0 +1,102 @@
+:host {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	align-content: stretch;
+}
+
+.tab-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: block;
+	border-bottom: 1px solid #ccc;
+	flex: 0;
+	line-height: 2em;
+}
+
+.tab-list::after {
+	content: 'filler';
+	display: inline-block;
+	width: 0;
+	overflow: hidden;
+}
+
+.tab-list > li {
+	line-height: inherit;
+	display: inline-block;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	-user-select: none;
+}
+
+.tab-list > button {
+	float: right;
+}
+
+.tab-list > button,
+.tab-list > li > button {
+	border: none;
+	background: none;
+	line-height: inherit;
+	margin: 0;
+	padding: 0 4px;
+}
+
+.tab-list > li > span {
+	display: inline-block;
+	padding: 0 0 0 8px;
+	cursor: pointer;
+	outline: none;
+	max-width: 150px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.tab-list > li:hover {
+	background: #eee;
+}
+
+.tab-list > li[selected=true] {
+	background: #ddd;
+}
+
+.panel-container {
+	position: relative;
+	flex: 1 1 0;
+}
+
+.panel-container > div {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: white;
+	z-index: 1;
+	overflow: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.panel-container > div[selected=true] {
+	z-index: 10;
+}
+
+.panel-container > div > textarea {
+	flex: 1 1;
+	margin:0;
+	border:0;
+	padding: 4px;
+	font-size: 14px;
+	resize: none;
+	min-height: 4em;
+}
+
+.panel-container > div > textarea:focus,
+.panel-container > div > canvas:focus {
+	outline: 0;
+}

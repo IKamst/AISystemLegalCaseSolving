@@ -1,0 +1,26 @@
+{
+	"folders":
+	[
+		{
+			"name": "HASL/1",
+			"path": "hasl1"
+		},
+		{
+			"name": "HASL/2",
+			"path": "hasl2"
+		},
+		{
+			"name": "Root",
+			"path": "."
+		}
+	],
+	"settings": {
+		"translate_tabs_to_spaces": true	
+	},
+	"build_systems": [
+		{
+			"name": "Test grammar",
+			"cmd": ["python3", "-u", "test.py"]
+		}
+	]
+}

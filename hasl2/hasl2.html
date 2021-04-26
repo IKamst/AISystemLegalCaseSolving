@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>HASL/2</title>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/grammar.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/tab-panel.css') }}">
+		<!--[if lt IE 9]>
+		  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+		  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
+		<style>
+			html, body {
+				height: 100%;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+
+			body {
+				display: flex;
+				flex-direction: column;
+			}
+
+			.navbar {
+				margin-bottom: 0;
+			}
+
+			body > .navbar > .container {
+				text-align: center;
+			}
+
+			.hasl-container {
+				flex: 1;
+				display: flex;
+				flex-direction: row;
+			}
+			
+			.text-panel, .diagram-panel {
+				flex: 1 1;
+				display: flex;
+			}
+
+			.text-panel {
+				border-right: 1px solid #ccc;
+			}
+
+			.text-panel > *, .diagram-panel > * {
+				flex: 1 1;
+	
+				/* Form the :host one */
+				display: flex;
+				flex-wrap: wrap;
+				flex-direction: column;
+				align-content: stretch;
+			}
+
+			.text-panel textarea + .sentence-list {
+				display: none;
+			}
+
+			.text-panel textarea:placeholder-shown + .sentence-list {
+				display: block;
+			}
+
+			.sentence-list ol {
+				list-style: none;
+				padding-left: 0;
+			}
+
+			.sentence-list .example-sentence-id::after {
+				content: ': ';
+			}
+
+			.sentence-list .example-sentence:hover {
+				cursor: pointer;
+				text-decoration: underline;
+			}
+
+			.diagram-panel canvas {
+				position: relative;
+				z-index: 2;
+				background: transparent;
+			}
+
+			.diagram-panel canvas + .hint {
+				position: absolute;
+				bottom: 0;
+				right: 0;
+				margin: 4px;
+				color: #ccc;
+				text-align: right;
+			}
+
+			.hint key {
+				display: inline-block;
+				background: #ddd;
+				color: white;
+				padding: 0 4px;
+				border-radius: 2px;
+				line-height: 1.2em;
+			}
+
+			.prompt-overlay {
+				position: fixed;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				background: rgba(255, 255, 255, 0.8);
+				z-index: 100;
+			}
+
+			.prompt-overlay .popup {
+				box-sizing: border-box;
+				width: 100%;
+				max-width: 600px;
+				height: calc(100% - 40px);
+				margin: 20px auto;
+				box-shadow: 0 5px 15px rgba(0,0,0,.5);
+				
+				display: flex;
+				flex-direction: column;
+				align-content: stretch;
+			}
+
+			.prompt-overlay .popup .panel-header {
+				flex: 0;
+				margin: 15px 0;
+			}
+
+			.prompt-overlay .popup .panel-footer {
+				flex: 0;
+				text-align: right;
+			}
+
+			.prompt-overlay .popup .panel-footer button {
+				display: inline-block;
+				margin: 0 4px;
+			}
+
+			.prompt-overlay .popup .panel-body {
+				flex: 1 1;
+				display: flex;
+			}
+
+			.prompt-overlay .popup .panel-body textarea {
+				flex: 1 1;
+				resize: none;
+				border: 0;
+				margin: -15px;
+				padding: 15px;
+			}
+		</style>
+	</head>
+	<body>
+		<nav class="navbar navbar-default">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="/" title="Human Argument Structure Language">HASL/2</a>
+				</div>
+				<div class="navbar-left">
+					<ul class="nav navbar-nav">
+						<li><a href="http://hasl1.ikhoefgeen.nl/">HASL/1</a></li>
+						<li><a href="https://github.com/jelmervdl/moriarty">Github</a></li>
+					</ul>
+				</div>
+				<div class="btn-group navbar-btn">
+					<button class="btn btn-default" id="diagram-to-text-btn" accesskey="f"><span class="glyphicon glyphicon-arrow-left"></span> <strong>Formulate</strong> diagram as text</button>
+					<button class="btn btn-default" id="text-to-diagram-btn" accesskey="c"><span class="glyphicon glyphicon-arrow-right"></span> <strong>Comprehend</strong> text as diagram</button>
+				</div>
+				<div class="btn-group navbar-btn navbar-right">
+					<button class="btn btn-default" id="load-diagram-btn" accesskey="l"><strong>Load</strong> diagram</button>
+					<button class="btn btn-default" id="save-diagram-btn" accesskey="s"><strong>Save</strong> diagram</button>
+				</div>
+			</div>
+		</nav>
+		<div class="hasl-container">
+			<div class="text-panel">
+				<div id="realisation-panel" class="realisations">
+					<ol class="tab-list">
+						<button id="add-realisation-tab" title="New text panel">+</button>
+					</ol>
+				</div>
+			</div>
+			<div class="diagram-panel">
+				<div id="diagram-panel" class="diagrams">
+					<ol class="tab-list">
+						<button id="add-diagram-tab" title="New diagram panel">+</button>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<script src="https://unpkg.com/@webcomponents/custom-elements@1.0.6/custom-elements.min.js"></script>
+		<script src="/static/js/canvas.js"></script>
+		<script src="/static/js/array.js"></script>
+		<script src="/static/js/graph.js"></script>
+		<script src="/static/js/layout.js"></script>
+		<script src="/static/js/tab-panel.js"></script>
+		<script>
+			(function(Graph) {
+				Graph.prototype.updateCanvasSize = function(e) {
+					let width = this.style.padding.left + this.style.padding.right + this.claims.map(claim => claim.x + claim.width).max();
+					let height = this.style.padding.top + this.style.padding.bottom + this.claims.map(claim => claim.y + claim.height).max();
+
+					if (this.canvas.parentElement) {
+						width = Math.max(this.canvas.parentElement.offsetWidth / this.style.scale, width);
+						height = Math.max(this.canvas.parentElement.offsetHeight / this.style.scale, height);
+					}
+
+					this.canvas.width = this.style.scale * width;
+					this.canvas.height = this.style.scale * height;
+
+					if ('style' in this.canvas) {
+						this.canvas.style.width = width + 'px';
+						this.canvas.style.height = height + 'px';
+					}
+				};
+
+				Graph.prototype.positionClaims = function() {
+					this.updateClaimSizes();
+		            this.claims.filter(claim => claim.data.compound).forEach(claim => {
+		                const bounds = this.findRelations({target: claim})
+		                    .map(relation => relation.claim)
+		                    .reduce((bounds, claim) => bounds.including(claim), new Bounds());
+		                claim.setPosition(bounds.center.x, bounds.y - 40);
+		            });
+				};
+			})(Graph);
+
+			const sentenceList = createExampleSentencesList();
+			
+			const realisationPanel = new TabPanel(document.getElementById('realisation-panel'));
+
+			const diagramPanel = new TabPanel(document.getElementById('diagram-panel'));
+
+			function createRealisation(text, n) {
+				const tab = realisationPanel.createTab('Realisation' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
+				const textarea = document.createElement('textarea');
+				textarea.placeholder = 'Type your argumentative text here…';
+				textarea.value = text || '';
+				tab.appendChild(textarea);
+				sentenceList.then(list => {
+					tab.appendChild(list.cloneNode(true));
+				});
+				return tab;
+			}
+
+			function createDiagram(diagram, n) {
+				let tab = diagramPanel.createTab('Parse ' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
+
+				let canvas = document.createElement('canvas');
+				tab.appendChild(canvas);
+
+				let hint = document.createElement('p');
+				hint.className = 'hint';
+				hint.innerHTML = [
+					'Double click to create a new claim',
+					'<key>alt</key> + click to create a support relation',
+					'<key>alt</key> + <key>shift</key> + click to create an attack relation',
+				].join('<br>');
+				tab.appendChild(hint);
+
+				canvas.width = 600;
+				canvas.height = 600;
+
+				let graph = new Graph(canvas);
+
+				tab.addEventListener('show', graph.draw.bind(graph));
+
+				tab.diagram = graph;
+
+				if (diagram) {
+					let instances = {
+						claim: {},
+						relation: {}
+					};
+
+					diagram.claims.forEach(claim => {
+						instances.claim[claim.id] = graph.addClaim(claim.text);
+					});
+
+					diagram.relations.forEach(relation => {
+						instances.relation[relation.id]= graph.addRelation(
+							relation.sources.map(source => instances[source.isa][source.id]),
+							instances[relation.target.isa][relation.target.id],
+							relation.type
+						);
+					});
+
+					if (graph.claims.every(claim => claim.x === 0 && claim.y === 0))
+						graph.layout().apply();
+					else
+						graph.positionClaims();
+
+					graph.fit();
+				}
+
+				return tab;
+			}
+
+			function createExampleSentencesList() {
+				return fetch('/sentences', {method: 'GET'})
+					.then(response => response.json())
+					.then(data => {
+						const sentenceList = document.createElement('ol');
+						sentenceList.className = 'sentence-list';
+
+						data.sections.forEach(entry => {
+							const header = document.createElement('li');
+							header.textContent = entry.section;
+
+							const list = Object.entries(entry.sentences)
+								.map(entry => {
+									const id = document.createElement('span');
+									id.className = 'example-sentence-id';
+									id.textContent = entry[0];
+
+									const sentence = document.createElement('span');
+									sentence.className = 'example-sentence';
+									sentence.textContent = entry[1];
+									
+									const item = document.createElement('li');
+									item.appendChild(id);
+									item.appendChild(sentence);
+									return item;
+								})
+								.reduce((list, item) => {
+									list.appendChild(item);
+									return list;
+								}, document.createElement('ol'));
+
+							sentenceList.appendChild(header);
+							sentenceList.appendChild(list);
+						});
+
+						return sentenceList;
+					});
+			}
+
+			function showPrompt(prompt, value) {
+				return new Promise((resolve, reject) => {
+					const overlay = document.createElement('div');
+					overlay.className = 'prompt-overlay';
+
+					const popup = document.createElement('div');
+					popup.className = 'popup panel panel-default';
+
+					const title = document.createElement('div');
+					title.className = 'panel-heading';
+					title.textContent = prompt;
+
+					const body = document.createElement('div');
+					body.className = 'panel-body';
+
+					const textfield = document.createElement('textarea');
+					textfield.placeholder = 'Type here…';
+					textfield.value = value;
+
+					const cancel = document.createElement('button');
+					cancel.className = 'btn btn-default';
+					cancel.textContent = 'Cancel';
+
+					const accept = document.createElement('button');
+					accept.className = 'btn btn-primary';
+					accept.innerHTML = '<strong>OK</strong>';
+
+					const controls = document.createElement('div');
+					controls.className = 'panel-footer';
+
+					body.append(textfield);
+
+					controls.appendChild(cancel);
+					controls.appendChild(accept);
+					
+					popup.appendChild(title);
+					popup.appendChild(body);
+					popup.appendChild(controls);
+
+					overlay.appendChild(popup);
+
+					// Remember focus
+					const prevActiveElement = document.activeElement;
+
+					// Show
+					document.body.appendChild(overlay);
+					textfield.select();
+					
+					function hide() {
+						document.body.removeChild(overlay);
+
+						// Return focus
+						if (prevActiveElement)
+							prevActiveElement.focus();
+					}
+
+					popup.addEventListener('keydown', e => {
+						switch (e.keyCode) {
+							case 27:
+								e.preventDefault();
+								hide();
+								reject();
+								break;
+
+							case 13:
+								if (!e.metaKey)
+									break;
+
+								e.preventDefault();
+								hide();
+								resolve(textfield.value);
+								break;
+						}
+					});
+
+					accept.addEventListener('click', e => {
+						hide();
+						resolve(textfield.value);
+					});
+
+					cancel.addEventListener('click', e => {
+						hide();
+						reject();
+					});
+				});
+			}
+
+			document.getElementById('text-to-diagram-btn').addEventListener('click', e => {
+				let sentence = realisationPanel.selectedTab.querySelector('textarea').value;
+
+				let request = fetch('/api/diagram', {
+					method: 'POST',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						'text': sentence
+					})
+				});
+				
+				let data = request.then(resp => resp.json());
+
+				// Draw diagrams
+				data.then(json => {
+					json.diagrams.forEach(createDiagram);
+				});
+
+				// But first, clear the current one
+				diagramPanel.clear();
+			});
+
+			document.getElementById('diagram-to-text-btn').addEventListener('click', e => {
+				let diagram = diagramPanel.selectedTab.diagram;
+
+				let sequence = 0;
+
+				function id(obj) {
+					if (!('id' in obj))
+						obj.id = sequence++;
+					return obj.id;
+				}
+
+				function ref(obj) {
+					let type = null;
+
+					if (obj instanceof Claim)
+						type = 'claim';
+					else if (obj instanceof Relation)
+						type = 'relation';
+					else
+						throw new Error('Unknown type');
+
+					if (obj.data.compound)
+						throw new Error('Trying to refer to implementation-artifact compound claim');
+
+					return {isa: type, id: id(obj)};
+				}
+
+				// Reset sequence to the maximum ID we already encountered
+				sequence = diagram.claims.concat(diagram.relations).reduce((max, obj) => {
+					return 'id' in obj ? Math.max(obj.id) : max
+				}, 0) + 1;
+
+				let json = {
+					isa: 'diagram',
+					claims: diagram.claims
+						.filter(claim => !claim.data.compound)
+						.map(claim => ({
+							isa: 'claim',
+							id: id(claim),
+							text: claim.text
+						})),
+					relations: diagram.relations.reduce((acc, relation) => {
+						if (relation.target.data.compound)
+							return acc;
+
+						return acc.concat([
+							{
+								isa: 'relation',
+								id: id(relation),
+								sources: relation.data.merged
+									? diagram.relations
+										.filter(rel => rel.target === relation.claim)
+										.map(rel => rel.claim)
+										.map(ref)
+									: [ref(relation.claim)],
+								target: ref(relation.target),
+								type: relation.type
+							}
+						]);
+					}, [])
+				};
+
+				let request = fetch('/api/text', {
+					method: 'POST',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						'diagram': json
+					})
+				});
+
+				let data = request.then(resp => resp.json());
+
+				// If there is an error, print it
+				data.then(json => {
+					if (json.error)
+						alert(json.error);
+				});
+
+				// If there are realisations, print realisation
+				data.then(json => {
+					if (json.texts)
+						json.texts.map(createRealisation)[0].querySelector('textarea').focus();
+
+					if (json.more)
+						alert('There are more formulations, but only the first 50 are shown.');
+				});
+
+				// Clear the current one
+				realisationPanel.clear();
+			});
+
+			document.getElementById('save-diagram-btn').addEventListener('click', e => {
+				if (!diagramPanel.selectedTab)
+					return;
+
+				let diagram = diagramPanel.selectedTab.diagram;
+				showPrompt('Diagram', diagram.toString());
+			});
+
+			document.getElementById('load-diagram-btn').addEventListener('click', e => {
+				showPrompt('Paste HASL diagram syntax here', '').then(text => {
+					let canvas = document.createElement('canvas');
+					canvas.width = 600;
+					canvas.height = 600;
+
+					let graph = new Graph(canvas);
+
+					try {
+						graph.parse(text);
+						
+						let title = 'Loaded ' + new Date().toLocaleTimeString();
+
+						const roots = graph.findRootClaims();
+						if (roots.length === 1)
+							title = roots[0].text;
+
+						let tab = diagramPanel.createTab(title);
+						tab.diagram = graph;
+						tab.appendChild(canvas);
+						tab.addEventListener('show', graph.draw.bind(graph));
+						
+						if (graph.claims.every(claim => claim.x === 0 && claim.y === 0))
+							graph.layout().apply();
+						else
+							graph.positionClaims();
+
+						graph.fit();
+						canvas.focus();
+					} catch (e) {
+						alert(e);
+					}
+				});
+			});
+
+			document.getElementById('add-realisation-tab').addEventListener('click', e => {
+				createRealisation().querySelector('textarea').focus();
+			});
+
+			document.getElementById('add-diagram-tab').addEventListener('click', e => {
+				createDiagram().querySelector('canvas').focus();
+			});
+
+			document.getElementById('realisation-panel').addEventListener('click', e => {
+				if (!e.target.matches('.example-sentence'))
+					return;
+				
+				const tab = e.target.closest('.sentence-list').parentElement;
+				const textfield = tab.querySelector('textarea')
+				textfield.value = e.target.textContent;
+				textfield.focus();
+				document.getElementById('text-to-diagram-btn').click();
+			});
+
+			document.body.addEventListener('dblclick', e => {
+				if (e.target.matches('.tab-list')) {
+					e.target.querySelector('button').click();
+					e.preventDefault();
+				}
+			});
+
+			document.body.addEventListener('dblclick', e => {
+				if (e.target.matches('.tab-list > li > span')) {
+					const title = prompt('Tab title:', e.target.textContent);
+					if (title)
+						e.target.textContent = title;
+					e.preventDefault();
+				}
+			});
+			
+			createRealisation();
+
+			createDiagram();
+
+		</script>
+	</body>
+</html>

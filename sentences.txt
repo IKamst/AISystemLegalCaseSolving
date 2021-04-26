@@ -1,0 +1,197 @@
+# Todo
+Harry is a British subject because Harry is a man born in Bermuda and a man born in Bermuda is a British subject but Harry has become naturalised.
+
+# General
+Tweety can fly.
+Tweety can fly because he is a bird.
+Tweety can fly because birds can fly and he is a bird.
+Tweety can fly because he is a bird and because he has wings.
+Tweety can fly because he has wings. Tweety can fly but he is not a bird.
+Tweety can fly because he has wings but he is not a bird.
+Tweety can fly because he is a bird and he has wings.
+
+# Conjunction
+Tweety can fly because he has wings, he has feathers and he is capable.
+
+# Rules
+Tweety can fly because he is a bird and birds can fly.
+Tweety can fly but he is a penguin and penguins can not fly.
+
+Tweety can fly because he is a bird and thieves are punishable.
+
+Tweety can fly because birds can fly, he is a bird, he has wings and he has feathers.
+
+Jack is a thief because he is a liar and liars are thieves.
+
+Tweety can fly because she is a bird and birds can fly because they have wings.
+
+Tweety can fly because he is a bird and something can fly if it is a bird and it has wings.
+
+# Rules: Multiple
+Tweety can fly because a bird can fly if it has wings and because a object can fly if it is light.
+
+
+# Rules: Order
+Tweety can fly because he is a bird and birds can fly.
+Tweety can fly because birds can fly and he is a bird.
+
+# Rules: "a bird" instead of "birds"
+Tweety can fly because a bird can fly and he is a bird.
+Jack is a thief because he is a liar and a liar is a thief.
+
+# Rules: Multi-stage inference
+Tweety can fly because he is a sparrow, sparrows are birds and birds can fly.
+
+# Rules: The Human Programming Language
+Tweety can fly because something can fly if it is a bird and Tweety is a bird.
+Tweety can fly because something can fly if it is a plane or it is a bird and Tweety is a bird.
+Tweety can fly because something can fly if it has wings and it is light and Tweety has wings and Tweety is light.
+
+# Anaphora
+Tweety can fly because he has wings and because Ducky is a bird and he has wings.
+The queen can fly because Tweety is a bird and he has wings and because she is a queen.
+The queen can fly because Tweety is a bird, he has wings and she is a queen.
+Jan can fly because Piet has wings and wings are tools and because he has feathers.
+Tweety can fly because she is a bird. Ducky can quack because he is a duck and she is a bird.
+
+John is ill because he has eaten spoiled food and because Henry is also ill because he has eaten spoiled food.
+John is ill because he has eaten spoiled food and because Henry is also ill.
+
+# Undercutter
+Jan is a prisoner but Jan is not a thief.
+Jan is a prisoner because thieves are prisoners but Jan is not a thief.
+
+# "although"
+Tweety can not fly because Tweety is a penguin, and although birds can fly and a penguin is a bird, a penguin can not fly.
+
+# Repeating claims
+Tweety can fly because she is a bird. Ducky can quack because Tweety is a bird.
+Tweety can fly because she is a bird. Ducky can quack because he can fly and she is a bird.
+
+# Recursion
+Tweety can fly because he has wings because he is a bird.
+Tweety can fly because he has wings but he is a penguin.
+Tweety can fly because birds can fly and he is a bird but he is a penguin.
+Tweety can fly because he is a bird and birds can fly but he is a penguin and penguins can not fly.
+
+# Assumptions
+Tweety can fly because birds can fly.
+Tweety can fly because birds can fly but he is a penguin.
+Tweety can fly because he is a bird but he is a penguin.
+
+Tweety can fly because a bird can fly when it has wings.
+Tweety can fly because birds can fly when they have wings.
+
+Tweety can fly because a bird can fly when it has wings and it has feathers.
+Tweety can fly because a bird can fly when it has wings and it has feathers. Tweety has feathers because he is a bird.
+
+Tweety can fly because a bird can fly if it is not a penguin.
+Tweety can fly because a bird can fly if it is not a penguin because it has wings.
+
+# Examples
+The act is tortious because an act is tortious when it is a violation, it is not justifiable and it is a result but the act was an omission.
+
+Socrates is mortal because all men are mortal.
+Socrates is mortal because he is a man.
+Socrates is mortal because he is a man and all men are mortal.
+Socrates is mortal because all men are mortal and he is a man.
+Socrates is mortal because he is a man, has died and all men are mortal.
+Socrates is mortal because all men are mortal, he is a man and has died.
+Socrates is mortal because he is a man and all men are mortal and because he has died.
+
+# Unused examples
+The man is free because he has survived and because the enemy is defeated.
+The man is free because he has survived and because he defeated the enemy.
+
+John is a loser because he was slow. Anna is a winner because John is a loser.
+John lost the race because he was too slow. Anna won the race because John lost the race.
+
+John is a loser because the king was slow. Anna is a winner because John is a loser and because the king was slow.
+
+# Broken
+the queen can fly because Tweety is a bird, he has wings and she is a queen. Tweety is a queen because she is pretty.
+The act is tortious because an act is tortious when it is bad, it is sad and it is wrong.
+The act is tortious because an act is tortious when it is a violation, it is not justifiable and it is the result.
+The man is free because a man is free when the country is safe.
+
+# Thesis HASL/2
+Birds except penguins can fly.
+Birds can fly except when they have clipped wings.
+Birds except penguins and ostriches can fly.
+Tweety can fly because Tweety is a bird and birds can fly except when they are penguins or when they are ostriches.
+
+# Thesis HASL/1
+Socrates is mortal because men are mortal.
+Socrates is mortal because he is a man.
+Socrates is a man and men are mortal.
+
+Tweety can fly but Tweety can not fly.
+Tweety is a bird but Tweety is a cat.
+Tweety can fly because he is a bird but he can not fly.
+Tweety can fly because he is a bird but not all birds can fly.
+Tweety is a bird but Tweety is a squirrel.
+
+All swans are black but I have seen a white swan.
+
+John has a duty to repair the damages because someone suffered damages, those damages were caused by an act of John, the act was unlawful and the act can be imputed to John. The act can be imputed to John because this article of law describes it as such and because common opinion describes it as such.
+
+Tweety can fly because Tweety is a bird and birds can fly.
+Socrates is mortal because he is human and humans are mortal.
+Tweety can fly because he is a bird, he has wings because he has appendages, they look like wings, and they have feathers.
+Tweety can fly because he is a bird and he has wings because he has appendages, they look like wings, and they have feathers.
+Tweety can fly because birds can fly but Tweety is a penguin.
+Tweety can fly because Tweety is a bird but Tweety is a penguin.
+Birds can fly but Tweety can not fly because Tweety is a penguin.
+The object is red because the object appears red to me but it is illuminated by a red light.
+The corporate income tax should be abolished because it is encouraging waste.
+John is punishable because he is a thief and thieves are punishable.
+Tweety can fly because Tweety is a bird but Tweety is a penguin.
+John must repair because Jack suffered damage, the damage was caused by an act of John, the act was unlawful and the act is imputed to John. The act is imputed to John because this article of law describes it as such and because the common opinion describes it as such.
+Tweety can fly because he has wings and he has feathers and because he is a bird.
+Tweety can fly but Tweety is a penguin but Tweety is a cat.
+Harry is a British subject because Harry is a man born in Bermuda but Harry has become naturalized.
+Petersen will not be a Roman Catholic because he is a Swede and a Swede can be taken almost certainly not to be a Roman Catholic because the proportion of Roman Catholic Swedes is less than 2%.
+John has a duty to repair the damages because someone suffered damages, those damages were caused by an act of John, the act was unlawful and the act can be imputed to John. The act can be imputed to John because this article of law describes it as such and because common opinion describes it as such.
+Tweety can fly because he has wings and he has feathers and because he is a bird.
+Tweety can fly because birds can fly but Tweety is a penguin.
+Tweety can fly because birds can fly but Tweety is a penguin.
+Birds can fly but Tweety can not fly because Tweety is a penguin.
+Tweety can fly but Tweety is a penguin but Tweety is a cat.
+John must repair the damage because he committed a tortious act against another person and a person must repair the damage if he committed an act against another person, the act is tortious, the act can be attributed to him and the other person has suffered the damage as a result thereof. The act is tortious if there was a violation of someone else's right, if an act or omission is in violation of a duty imposed by law or if an act or omission is in violation of what according to unwritten law has to be regarded as proper social conduct unless there was a justification for this behaviour. The act can be attributed to him if it results from his fault or if it results from a cause for which he is accountable by virtue of law or generally accepted principles.
+Tweety can fly because Tweety is a bird.
+If it is a bird, it can fly.
+It can fly if it is a bird.
+Birds can fly.
+Red birds can fly.
+Birds and planes can fly.
+Tweety can fly because creatures with wings can fly and Tweety is a bird.
+Tweety can fly because Tweety is a bird
+Tweety can fly but Tweety is a penguin
+The pan is hot because the pan is made of metal and the pan is glowing.
+Socrates is mortal because he is a man. Socrates is mortal because he is dead.
+Tweety can fly because Tweety is a bird. Tweety is a bird because Tweety has wings.
+Tweety can fly because Tweety is a bird and birds can fly.
+Tweety can fly but Tweety is a penguin and penguins can not fly.
+Tweety can fly because Tweety is a bird and birds can fly but Tweety is a squirrel.
+The pan is hot because the pan is made of metal and the pan is glowing.
+Socrates is mortal because he is a man and because he is dead.
+Tweety can fly because Tweety is a bird because Tweety has wings because I have seen them.
+Tweety can fly because Tweety is a bird and birds can fly except Tweety is a penguin.
+Something can fly when it has wings and it has an engine or when it is a bird.
+Something can fly when it has wings or when it is a bird unless it is a penguin or its wings have been clipped.
+Socrates is mortal because he is a man and something is mortal if something is a man.
+Socrates is mortal because he is a man and something is mortal if something is a man or if something is a mammal.
+Doom will be a bad movie because video game stories make for bad movies, although Tomb Raider was not that bad.
+
+# Abstract thesis sentences
+$A$ because $B$.
+$A$ but $B$.
+$A$ because $B$ and because $C$
+$A$ because $B$ and $C$
+$A$ because $B$ because $C$
+$A$ because $B^s$ and $C^g$.
+$A$ but $B^s$ and $C^g$.
+$A$ because $B^s$ and $C^g$ but $D$.
+$A$ because $C^g$.
+$A$ because $B^s$.
+$B^s$ and $C^g$.

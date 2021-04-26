@@ -1,0 +1,117 @@
+# Solo claims
+Tweety can fly.
+A man born on a Saturday in Bermuda can fly to the ocean.
+
+
+# Negation
+Tweety cannot fly.
+Birds cannot fly.
+A bird cannot fly.
+No bird can fly.
+
+# Pros
+Socrates is mortal because Socrates is a man.
+Tweety can fly because Tweety is a bird.
+Birds can fly because birds have wings.
+Birds can fly because Tweety can fly.
+
+# Cons
+Socrates is mortal but Socrates is a god.
+Tweety is a bird but Tweety is a cat.
+Tweety can fly but Tweety is a penguin.
+
+# Mutual attack
+Tweety can fly but Tweety cannot fly. Tweety cannot fly but Tweety can fly.
+Tweety can fly but Tweety cannot fly.
+
+# Pros combinations
+Tweety can fly because Tweety is a bird. Tweety is a bird because Tweety has wings.
+Tweety can fly because Tweety is a bird. Tweety can fly because Tweety has wings.
+
+Tweety can fly because Tweety is a bird and because Tweety has wings.
+Tweety can fly because Tweety is a bird and Tweety has wings.
+Tweety can fly because Tweety is a bird because Tweety has wings.
+
+Tweety can fly because he has wings, he has feathers and he is capable.
+Tweety can fly because Tweety is a bird because Tweety is a duck because Tweety has a bill.
+Tweety can fly because Tweety is a bird because Tweety is a duck and because Tweety has wings.
+Tweety can fly because Tweety is a bird and Tweety has wings because Tweety is a duck.
+Tweety can fly because Tweety is a bird and because Tweety is a duck because Tweety has a bill.
+
+# Cons combinations
+Tweety can fly but Tweety is a cat. Tweety is a cat but Tweety has wings. Tweety has wings but the wings are small.
+Tweety can fly but Tweety is a cat but Tweety has wings but the wings are small.
+
+# Pros and cons combinations (incl. undercutters)
+Tweety can fly because Tweety is a bird. Tweety is a bird but Tweety is a cat.
+Tweety can fly because Tweety is a bird but Tweety is a cat.
+
+Tweety can fly because Tweety is a bird. Tweety is a bird but Tweety is a penguin.
+Tweety can fly because Tweety is a bird. Tweety can fly but Tweety is a penguin.
+Tweety can fly because Tweety is a bird but Tweety is a penguin.
+Tweety can fly because Tweety is a bird but he can not fly.
+
+Tweety can fly because he is a bird and because he has wings.
+Tweety can fly because he has wings but he is not a bird.
+Tweety can fly because he is a bird and he has wings.
+
+Harry is a British subject because Harry is a man born in Bermuda but Harry has become naturalized.
+
+# Undercutters
+The object is red because the object appears red to me but it is illuminated by a red light.
+Jan is a prisoner but Jan is not a thief.
+Jan is a prisoner because thieves are prisoners but Jan is not a thief.
+
+# Warranted support
+Tweety can fly because he is a bird and birds can fly.
+Tweety can fly because birds can fly and he is a bird.
+Tweety can fly because birds can fly, he is a bird, he has wings and he has feathers.
+
+Tweety can fly because he is a bird and thieves are punishable.
+
+Tweety can fly because birds can fly and he is a bird and because superheroes can fly and he is a superhero.
+
+# Warranted attack
+Tweety can fly but he is a penguin and penguins can not fly.
+Jack is a thief because he is a liar and liars are thieves.
+
+# Warrants combinations
+Tweety can fly because he is a bird but not all birds can fly.
+Tweety can fly because he is a bird but birds cannot fly.
+Tweety can fly because she is a bird and birds can fly because they have wings.
+
+# Rule-like sentences
+A bird can fly.
+Birds can fly.
+Birds cannot fly.
+
+All birds can fly.
+
+Liars are thieves.
+
+# Rules with exceptions
+Birds can fly except if they are penguins.
+Birds can fly except penguins.
+Birds except penguins can fly.
+
+# Anaphora
+Tweety can fly because he has wings.
+The bird can fly because he has wings.
+The bird can fly because he has wings and they help him.
+
+The queen can rule because she is born in a royal family and because the king abdicated.
+The queen can rule because the king abdicated and because she is born in a royal family.
+
+# Enthymemes
+Socrates is mortal because men are mortal.
+Socrates is mortal because he is a man.
+Socrates is a man and men are mortal.
+
+The corporate income tax should be abolished because it is encouraging waste.
+
+Tweety can fly but Tweety is a penguin and penguins can not fly.
+
+# Referential
+
+
+John has a duty because Jack has suffered damages, those damages are caused by an act of John, the act was unlawful and the act can be imputed to John. The act can be imputed to John because this article of law describes it as such and because common opinion describes it as such.

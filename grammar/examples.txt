@@ -1,0 +1,6 @@
+Tweety is a bird.
+Tweety can fly.
+a bird can fly.
+birds can fly.
+a penguin is a bird.
+penguins are birds.

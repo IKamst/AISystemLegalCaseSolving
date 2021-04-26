@@ -1,0 +1,59 @@
+VERB_INF: "fly" | "walk" | "think"
+
+NOUN: "bird" | "penguin" | king" | "queen" | "man"
+NOUNS: "birds" | "penguins" | kings" | "queens" | "men"
+
+NAME: "Henry" | "Tweety"
+NAMES: NAME_ "and" NAME
+NAME_: NAME "," NAME_
+NAME_: NAME
+
+# Names, pronouns, and NP's with the determiner 'the'
+INSTANCE: NAME
+INSTANCE: "he" | "she" | "it"
+INSTANCE: "the" NOUN
+
+INSTANCES: "they"
+INSTANCES: "the" NOUNS
+INSTANCES: NAMES
+
+# Adjectives
+CATEGORY: "rich" | "smart" | "beautiful" | "workable"
+
+# "a cow", NP's with the determiner 'a'
+PROTOTYPE: "a" NOUN
+PROTOTYPES: NOUNS
+
+# Why not CATEGORY: PROTOTYPE? Because ' "are" CATERGORY ' 
+# does not match with singular prototype.
+
+CATEGORY: "not" CATEGORY
+PROTOTYPE: "not" PROTOTYPE
+PROTOTYPES: "not" PROTOTYPES
+
+SUBJECT: INSTANCE | PROTOTYPE
+SUBJECTS: INSTANCES | PROTOTYPES
+
+CLAIM: SUBJECT "is" CATEGORY
+CLAIM: SUBJECT "is" PROTOTYPE
+
+CLAIM: SUBJECTS "are" CATEGORY
+CLAIM: SUBJECTS "are" PROTOTYPES
+
+SPECIFIC_CLAIM: INSTANCE "is" CATEGORY
+SPECIFIC_CLAIM: INSTANCE "is" PROTOTYPE
+
+SPECIFIC_CLAIM: INSTANCES "are" CATEGORY
+SPECIFIC_CLAIM: INSTANCES "are" PROTOTYPES
+
+SPECIFIC_CLAIM: INSTANCE "can" VERB_INF
+SPECIFIC_CLAIM: INSTANCES "can" VERB_INF
+
+SPECIFIC_CLAIM: INSTANCE "can" "not" VERB_INF
+SPECIFIC_CLAIM: INSTANCES "can" "not" VERB_INF
+
+GENERAL_CLAIM: PROTOTYPE "is" CATEGORY
+GENERAL_CLAIM: PROTOTYPE "is" PROTOTYPE
+
+GENERAL_CLAIM: PROTOTYPES "are" CATEGORY
+GENERAL_CLAIM: PROTOTYPES "are" PROTOTYPES

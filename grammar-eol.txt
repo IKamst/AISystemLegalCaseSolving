@@ -1,0 +1,53 @@
+START: ARGUMENT
+
+; An argument is formed by or multiple claim-clauses
+ARGUMENT: ARGUMENT CLAIMCLAUSE "."
+ARGUMENT: CLAIMCLAUSE "."
+
+CLAIMCLAUSE: CLAIM SUPPORT ";" ATTACK
+CLAIMCLAUSE: CLAIM SUPPORT
+CLAIMCLAUSE: CLAIM ATTACK
+CLAIMCLAUSE: CLAIM
+
+SUPPORT: "because" COMBINEDCLAIMCLAUSE
+SUPPORT: "because" COMBINEDCLAIMCLAUSE "and" SUPPORT
+
+ATTACK: "but" CLAIMCLAUSE
+
+COMBINEDCLAIMCLAUSE: CLAIMCLAUSE "and" COMBINEDCLAIMCLAUSE
+COMBINEDCLAIMCLAUSE: CLAIMCLAUSE
+
+CLAIM: "The" "Syrian" "Regime" "might" "possess" "biological" "weapons"
+CLAIM: "there" "are" "some" "reports" "of" "an" "active" "research" "and" "production" "program"
+CLAIM: "rebel" "forces" "were" "attacked" "using" "biological" "weapons"
+CLAIM: "there" "are" "reports" "of" "sightings" "of" "production" "facilities"
+CLAIM: "these" "production" "facilities" "located" "in" "region" "that" "is" "under" "control" "of" "the" "Syrian" "regime"
+CLAIM: "The" "Syrian" "Regime" "should" "not" "be" "able" "to" "acquire" "nuclear" "weapons"
+CLAIM: "nuclear" "capabilities" "would" "make" "it" "a" "global" "threat"
+CLAIM: "global" "threats" "should" "be" "minimized"
+CLAIM: "the" "sources" "of" "these" "reports" "has" "been" "accurate" "before"
+CLAIM: "the" "damage" "caused" "by" "the" "use" "of" "nuclear" "weapons" "affects" "humanity" "on" "a" "global" "scale"
+CLAIM: "they" "claim" "they" "do" "not" "possess" "them"
+CLAIM: "these" "reports" "are" "not" "very" "reliable"
+
+[[The Syrian Regime might possess biological weapons] because [there are some reports of an active research and production program].]
+
+[[The Syrian Regime might possess biological weapons] because [there are some reports of an active research and production program]. [The Syrian Regime might possess biological weapons] because [rebel forces were attacked using biological weapons].]
+
+[[The Syrian Regime might possess biological weapons] because [there are some reports of an active research and production program] and because [rebel forces were attacked using biological weapons].]
+
+[[The Syrian Regime might possess biological weapons] because [there are reports of sightings of production facilities] and [these production facilities located in region that is under control of the Syrian regime].]
+
+[[The Syrian Regime should not be able to acquire nuclear weapons] because [nuclear capabilities would make it a global threat] and [global threats should be minimized].]
+
+[[The Syrian Regime might possess biological weapons] because [there are reports of sightings of production facilities] and [the sources of these reports has been accurate before].]
+
+[[The Syrian Regime should not be able to acquire nuclear weapons] because [nuclear capabilities would make it a global threat] because [the damage caused by the use of nuclear weapons affects humanity on a global scale].]
+
+[[The Syrian Regime might possess biological weapons] because [there are reports of sightings of production facilities]. [The Syrian Regime might possess biological weapons] but [they claim they do not possess them].]
+
+; [[The Syrian Regime might possess biological weapons] because [there are reports of sightings of production facilities] and but [they claim they do not possess them].]
+
+[[The Syrian Regime might possess biological weapons] because [there are reports of sightings of production facilities]; but [they claim they do not possess them].]
+
+[[The Syrian Regime might possess biological weapons] because [there are reports of sightings of production facilities] but [these reports are not very reliable].]
