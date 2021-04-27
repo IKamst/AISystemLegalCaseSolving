@@ -98,6 +98,7 @@ class Claim {
 		this.graph = graph;
 		this._text = text;
 		this.data = data || {};
+		this.satisfaction = "unknown"; // ADDED
 		this.ax = 0;
 		this.ay = 0;
 		this.dx = 0;
@@ -109,6 +110,10 @@ class Claim {
 	setPosition(x, y) {
 		this.ax = x;
 		this.ay = y;
+	}
+
+	setSatisfaction(newSatisfaction) { // ADDED
+		this.satisfaction = newSatisfaction;
 	}
 	
 	delete() {
