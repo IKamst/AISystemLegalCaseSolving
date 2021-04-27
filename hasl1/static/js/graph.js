@@ -334,8 +334,19 @@ class Graph {
 				fontSize: 13,
 				lineHeight: 16,
 				maxWidth: 300,
-				background: function(claim) {
-					return 'white';
+				background: function(claim) { // ADDED (changed)
+					if (claim.satisfaction == "yes") {
+						return 'green';
+					}
+					else if (claim.satisfaction == "no") {
+						return 'red';
+					}
+					else if (claim.satisfaction == "unknown") {
+						return 'yellow';
+					}
+					else {
+						return 'purple'
+					}
 				},
 				fontColor: function(claim) {
 					return claim.data.assumption ? '#ccc' : 'black';
@@ -690,13 +701,13 @@ class Graph {
 		const stepSize = 2 * this.style.scale;
 
 		switch (e.keyCode) {
-			case 8: // Backspace
-			case 46: // Delete
-				this.selectedClaims.forEach(claim => claim.delete());
-				this.selectedRelations.forEach(relation => relation.delete());
-				e.preventDefault();
-				this.update();
-				break;
+			// case 8: // Backspace
+			// case 46: // Delete
+			// 	this.selectedClaims.forEach(claim => claim.delete());
+			// 	this.selectedRelations.forEach(relation => relation.delete());
+			// 	e.preventDefault();
+			// 	this.update();
+			// 	break;
 
 			case 9: // Capture [tab] key
 				// If there are no claims, there is nothing to move focus to
