@@ -755,6 +755,23 @@ class Graph {
 			case 18: // Alt
 				this.update();
 				break;
+
+			case 89: // y ADDED
+				this.selectedClaims.forEach(claim => claim.setSatisfaction("yes"));
+				print(this.selectedClaims.forEach(claim => claim.satisfaction));
+				e.preventDefault();
+				this.update();
+				break;
+			case 78: // n ADDED
+				this.selectedClaims.forEach(claim => claim.setSatisfaction("no"));
+				e.preventDefault();
+				this.update();
+				break;
+			case 85: // u ADDED
+				this.selectedClaims.forEach(claim => claim.setSatisfaction("unknown"));
+				e.preventDefault();
+				this.update();
+				break;
 		}
 	}
 
