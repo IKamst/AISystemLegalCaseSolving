@@ -670,6 +670,21 @@
                     return this.relations.filter(test);
                 }
 
+                findConcludingClaims() { // ADDED
+                    var concludingClaims = [];
+                    this.claims.forEach(claim => {
+                        for (const [index, el] of this.relations.entries()) {
+                            if (el.claim === claim) { // break if this is a claim for another claim
+                                break;
+                            }
+                            if (index === this.relations.length) { // if no claim for another claim, this is a concluding claim
+                                concludingClaims.push(el);
+                            }
+                        }
+                    });
+                    return concludingClaims;
+                }
+
                 findContext(claim) {
                     // The context of a claim is all its conditions and exceptions
                     const types = [Relation.CONDITION, Relation.EXCEPTION];
@@ -971,18 +986,16 @@
 
                         case 86: // v ADDED
                             this.selectedClaims.forEach(claim => {
-                                this.relations.forEach(relation => {
-                                    if (relation.claim === claim) {
-                                        claim.setSatisfaction("yes");
-                                    }
-                                });
+                                if (!(claim in this.findConcludingClaims())) {
+                                    claim.setSatisfaction("yes");
+                                }
                             });
                             e.preventDefault();
                             this.update();
                             break;
                         case 78: // n ADDED
                             this.selectedClaims.forEach(claim => {
-                                this.relations.forEach(relation => {
+                                this.relations.forEach(relation => { // only make this possible for non-conclusionn claims
                                     if (relation.claim === claim) {
                                         claim.setSatisfaction("no");
                                     }
