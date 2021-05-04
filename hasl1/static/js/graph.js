@@ -115,7 +115,7 @@ class Claim {
 	setSatisfaction(newSatisfaction) { // ADDED
 		this.satisfaction = newSatisfaction;
 	}
-	
+
 	delete() {
 		// Remove the claims from the graph
 		this.graph.claims = this.graph.claims.filter(claim => claim !== this);
@@ -140,11 +140,11 @@ class Claim {
 	get text() {
 		return this._text;
 	}
-	
+
 	get x() {
 		return this.ax + this.dx;
 	}
-	
+
 	get y() {
 		return this.ay + this.dy;
 	}
@@ -199,19 +199,19 @@ class Relation {
 	get x() {
 		return this.claim.x + (this.target.x - this.claim.x) / 2;
 	}
-	
+
 	get y() {
 		return this.claim.y + (this.target.y - this.claim.y) / 2;
 	}
-	
+
 	get width() {
 		return 1;
 	}
-	
+
 	get height() {
 		return 1;
 	}
-	
+
 	get center() {
 		return {
 			x: this.claim.center.x + (this.target.center.x - this.claim.center.x) / 2,
@@ -254,7 +254,7 @@ class LetterSequence {
 	toString() {
 		let value = this.counter;
 		let chars = '';
-		
+
 		if (value === 0) {
 			return 'a';
 		}
@@ -358,7 +358,7 @@ class Graph {
 					if (claim.data.scope) {
 						if (!(claim.data.scope in scopeStyles))
 							scopeStyles[claim.data.scope] = colours.pop();
-						
+
 						return scopeStyles[claim.data.scope];
 					}
 
@@ -432,7 +432,7 @@ class Graph {
 	findRootClaims() {
 		if (this.claims.length == 0)
 			return [];
-		
+
 		// Find all claims that are the source for a relation
 		const sources = this.relations.map(relation => relation.claim);
 
@@ -571,7 +571,7 @@ class Graph {
 		};
 
 		let claim = this.findClaimAtPosition(cursor);
-		
+
 		const text = prompt('Text of claim:', claim ? claim.text : '');
 
 		if (!text)
@@ -614,7 +614,7 @@ class Graph {
 					y: cursor.y,
 					type: e.shiftKey ? Relation.ATTACK : Relation.SUPPORT
 				};
-				
+
 				this.update();
 			}
 		} else {
@@ -686,7 +686,7 @@ class Graph {
 
 			this.fire('drop');
 		}
-		
+
 		this.dragStartPosition = null;
 	}
 
@@ -716,7 +716,7 @@ class Graph {
 
 				const direction = e.shiftKey ? -1 : 1;
 				let idx = -1;
-				
+
 				// Find the first claim in selectedClaims
 				if (this.selectedClaims.length > 0)
 					idx = this.claims.indexOf(this.selectedClaims[0]);
@@ -913,9 +913,9 @@ class Graph {
 		this.drawSelection();
 
 		this.drawCursor();
-		
+
 		this.fire('draw');
-		
+
 		// Undo the translation
 		this.context.setTransform(1, 0, 0, 1, 0, 0);
 	}
@@ -950,7 +950,7 @@ class Graph {
 
 			if (this.findRelations({claim: claim}).length === 0)
 				return;
-			
+
 			ctx.fillStyle = 'white';
 			ctx.fillRect(
 				this.style.scale * bounds.x,
@@ -1029,7 +1029,7 @@ class Graph {
 
 		ctx.lineWidth = scale * 3;
 		ctx.strokeStyle = color;
-		
+
 		// Draw an extra outline for the selected claims
 		this.selectedClaims.forEach(claim => {
 			ctx.strokeRect(
@@ -1080,7 +1080,7 @@ class Graph {
 				const index = incoming.indexOf(relation);
 				target = relation.target.joint(index, incoming.length);
 			}
-			
+
 			const s = this.offsetPosition(target, source);
 			const t = this.offsetPosition(source, target);
 
@@ -1124,9 +1124,9 @@ class Graph {
 					ctx.lineWidth = scale * 2;
 				else
 					ctx.lineWidth = scale * 1;
-			
+
 				ctx.setLineDash([]);
-				ctx.arrow(scale * arrowRadius, 
+				ctx.arrow(scale * arrowRadius,
 					scale * s.x,
 					scale * s.y,
 					scale * t.x,
@@ -1151,7 +1151,7 @@ class Graph {
 					ctx.lineWidth = scale * 1;
 
 				ctx.setLineDash([]);
-				ctx.cross(0.75 * scale * arrowRadius, 
+				ctx.cross(0.75 * scale * arrowRadius,
 					scale * s.x,
 					scale * s.y,
 					scale * t.x,
@@ -1341,7 +1341,7 @@ class Graph {
 					.filter(rel => rel.target === relation.claim)
 					.map(rel => rel.claim)
 				: [relation.claim];
-			
+
 			// If either the original relation is an assumption, or
 			// it is a merged relation and all sources are assumptions,
 			// this relation will be marked as an assumption.
@@ -1368,7 +1368,7 @@ class Graph {
 }
 
 // Set default claim class
-Graph.Claim = Claim; 
+Graph.Claim = Claim;
 
 exports.Claim = Claim;
 exports.Relation = Relation;
