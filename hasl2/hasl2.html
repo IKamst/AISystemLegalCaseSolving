@@ -671,17 +671,15 @@
                 }
 
                 findConcludingClaims() { // ADDED
-                    var concludingClaims = [];
-                    this.claims.forEach(claim => {
-                        for (const [index, el] of this.relations.entries()) {
-                            if (el.claim === claim) { // break if this is a claim for another claim
+                    let concludingClaims = this.claims.slice();
+                    for (const [claimIndex, claimEl] of concludingClaims.entries()) {
+                        for (const [relationIndex, relationEl] of this.relations.entries()) {
+                            if (relationEl.claim === claimEl) { // remove break if this is a claim for another claim
+                                concludingClaims.splice(claimIndex, 1);
                                 break;
                             }
-                            if (index === this.relations.length) { // if no claim for another claim, this is a concluding claim
-                                concludingClaims.push(el);
-                            }
                         }
-                    });
+                    };
                     return concludingClaims;
                 }
 
@@ -986,7 +984,7 @@
 
                         case 86: // v ADDED
                             this.selectedClaims.forEach(claim => {
-                                if (!(claim in this.findConcludingClaims())) {
+                                if (!(this.findConcludingClaims().includes(claim))) {
                                     claim.setSatisfaction("yes");
                                 }
                             });
@@ -995,11 +993,9 @@
                             break;
                         case 78: // n ADDED
                             this.selectedClaims.forEach(claim => {
-                                this.relations.forEach(relation => { // only make this possible for non-conclusionn claims
-                                    if (relation.claim === claim) {
-                                        claim.setSatisfaction("no");
-                                    }
-                                });
+                                if (!(this.findConcludingClaims().includes(claim))) {
+                                    claim.setSatisfaction("no");
+                                }
                             });
                             e.preventDefault();
                             this.update();
