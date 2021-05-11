@@ -194,6 +194,10 @@
 					</ol>
 				</div>
 			</div>
+{#            <div class="evaluation-panel"> // ADDED#}
+{#                <div id="evaluation-panel" class="evaluations">#}
+{#                </div>#}
+{#            </div>#}
 		</div>
 		<script src="https://unpkg.com/@webcomponents/custom-elements@1.0.6/custom-elements.min.js"></script>
 		<script src="/static/js/canvas.js"></script>
@@ -691,17 +695,42 @@
                 updateConcludingClaims(claim) { // ADDED
                     this.claims.forEach(someClaim => { // Go through all claims
                         if (this.findConcludingClaims().includes(someClaim)) { // This is a concluding claim
-                            let relations = this.findRelations([{claim: claim, target: someClaim}]);
-                            if (!(relations.length == 0)) { // the claim is affecting the concluding claim
-                                this.claims.forEach(possiblyEffectiveClaim => {
-                                    let effectiveRelations = this.findRelations([{claim: possiblyEffectiveClaim, target: someClaim}]);
-                                    if (!(effectiveRelations.length == 0)) { // found a relation that we want!
-                                        if (!(possiblyEffectiveClaim.satisfaction == "yes")) {
-                                            someClaim.setSatisfaction("no");
+                            let relations = this.findRelations([{target: someClaim}]);
+                            relations.forEach(relation => {
+                                if (relation.claim.text === '&') { // conjunction
+                                    let compoundRelations = this.findRelations([{claim: claim, target: relation.claim}]);
+                                    if (compoundRelations.length > 0) { // found a concluding claim for which the current claim is effective
+                                        let broken = false;
+                                        let allCompoundRelations = this.findRelations([{target: relation.claim}]);
+                                        allCompoundRelations.forEach(compoundRelation => {
+                                            // all effective claims should be true and supportive for the concl claim to be true
+                                            if (!(compoundRelation.claim.satisfaction === "yes")) {
+                                                someClaim.setSatisfaction("no");
+                                                broken = true;
+                                            }
+                                        });
+                                        if (broken === false) {
+                                            someClaim.setSatisfaction("yes");
                                         }
                                     }
-                                });
-                            }
+                                } else { // disjunction
+
+                                }
+
+                            });
+
+
+
+                            {#if (!(relations.length == 0)) { // the claim is affecting the concluding claim#}
+                            {#    this.claims.forEach(possiblyEffectiveClaim => {#}
+                            {#        let effectiveRelations = this.findRelations([{claim: possiblyEffectiveClaim, target: someClaim}]);#}
+                            {#        if (!(effectiveRelations.length == 0)) { // found a relation that we want!#}
+                            {#            if (!(possiblyEffectiveClaim.satisfaction == "yes")) {#}
+                            {#                someClaim.setSatisfaction("no");#}
+                            {#            }#}
+                            {#        }#}
+                            {#    });#}
+                            {# }#}
                         }
                     });
                         {#if (!(this.findConcludingClaims().includes(claim))) {#}
