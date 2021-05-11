@@ -671,16 +671,71 @@
                 }
 
                 findConcludingClaims() { // ADDED
-                    let concludingClaims = this.claims.slice();
-                    for (const [claimIndex, claimEl] of concludingClaims.entries()) {
+                    let concludingClaims = [];
+                    let broken = false;
+                    for (const [claimIndex, claimEl] of this.claims.entries()) {
+                        broken = false;
                         for (const [relationIndex, relationEl] of this.relations.entries()) {
-                            if (relationEl.claim === claimEl) { // remove break if this is a claim for another claim
-                                concludingClaims.splice(claimIndex, 1);
+                            if (relationEl.claim === claimEl) { // break if this is a claim for another claim
+                                broken = true;
                                 break;
                             }
                         }
-                    };
+                        if (broken === false) {
+                            concludingClaims.push(claimEl);
+                        }
+                    }
                     return concludingClaims;
+                }
+
+                updateConcludingClaims(claim) { // ADDED
+                    this.claims.forEach(someClaim => { // Go through all claims
+                        if (this.findConcludingClaims().includes(someClaim)) { // This is a concluding claim
+                            let relations = this.findRelations([{claim: claim, target: someClaim}]);
+                            if (!(relations.length == 0)) { // the claim is affecting the concluding claim
+                                this.claims.forEach(possiblyEffectiveClaim => {
+                                    let effectiveRelations = this.findRelations([{claim: possiblyEffectiveClaim, target: someClaim}]);
+                                    if (!(effectiveRelations.length == 0)) { // found a relation that we want!
+                                        if (!(possiblyEffectiveClaim.satisfaction == "yes")) {
+                                            someClaim.setSatisfaction("no");
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                        {#if (!(this.findConcludingClaims().includes(claim))) {#}
+                        {#    claim.setSatisfaction("yes");#}
+                        {#    e.preventDefault();#}
+                        {#    this.update();#}
+                        {#    this.updateConcludingClaims(claim);#}
+                        {#    e.preventDefault();#}
+                        {#    this.update();#}
+                        {# }#}
+                    {#this.findConcludingClaims().forEach(concludingClaim => {#}
+                    {#    let relations = this.findRelations([{claim: claim, target: concludingClaim}]);#}
+                    {#    if (!(relations.length === 0)) {#}
+                    {#        this.findRelations([{target: concludingClaim}]).forEach(otherRelation => {#}
+                    {#            if (!(otherRelation.claim.satisfaction === "yes")) {#}
+                    {#                concludingClaim.setSatisfaction("no");#}
+                    {#            }#}
+                    {#        })#}
+                    {#    }#}
+                    {# })#}
+                    {#for (const [conclusionIndex, conclusionEl] of this.findRelations([{claim: claim}]).entries()) { // go through all relations in which the given claim is the effective claim#}
+                    {#    let effectiveClaims = [];#}
+                    {#    if (conclusionEl.target instanceof Claim) { // make sure target is not a relationship itself#}
+                    {#        conclusionEl.target.setSatisfaction("no");#}
+                    {#        for (const [relationIndex, relationEl] of this.findRelations([{target: conclusionEl.target}]).entries()) { // go through all claims that lead to the concluding claim#}
+                    {#            effectiveClaims.push(relationEl.claim); // find all effective claims for the concluding claim#}
+                    {#        }#}
+                    {#        if (effectiveClaims.every(effectiveClaim => effectiveClaim.satisfaction === "yes")) { // if all effective claims are satisfied, the concluding claim is satisfied#}
+                    {#            conclusionEl.target.setSatisfaction("yes");#}
+                    {#        } else { // else it is not satisfied#}
+                    {#            conclusionEl.target.setSatisfaction("no");#}
+                    {#        }#}
+                    {#    }#}
+                    {# }#}
                 }
 
                 findContext(claim) {
@@ -986,24 +1041,37 @@
                             this.selectedClaims.forEach(claim => {
                                 if (!(this.findConcludingClaims().includes(claim))) {
                                     claim.setSatisfaction("yes");
+                                    e.preventDefault();
+                                    this.update();
+                                    this.updateConcludingClaims(claim);
+                                    e.preventDefault();
+                                    this.update();
                                 }
                             });
-                            e.preventDefault();
-                            this.update();
                             break;
                         case 78: // n ADDED
                             this.selectedClaims.forEach(claim => {
                                 if (!(this.findConcludingClaims().includes(claim))) {
                                     claim.setSatisfaction("no");
+                                    e.preventDefault();
+                                    this.update();
+                                    this.updateConcludingClaims(claim);
+                                    e.preventDefault();
+                                    this.update();
                                 }
                             });
-                            e.preventDefault();
-                            this.update();
                             break;
                         case 85: // u ADDED
-                            this.selectedClaims.forEach(claim => claim.setSatisfaction("unknown"));
-                            e.preventDefault();
-                            this.update();
+                            this.selectedClaims.forEach(claim => {
+                                if (!(this.findConcludingClaims().includes(claim))) {
+                                    claim.setSatisfaction("unknown");
+                                    e.preventDefault();
+                                    this.update();
+                                    this.updateConcludingClaims(claim);
+                                    e.preventDefault();
+                                    this.update();
+                                }
+                            });
                             break;
                     }
                 }
