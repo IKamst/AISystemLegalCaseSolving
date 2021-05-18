@@ -2076,96 +2076,106 @@
             document.getElementById('evaluate-btn').addEventListener('click', e => { {# ADDED #}
                 let diagram = diagramPanel.selectedTab.diagram;
 
-                let sequence = 0;
-
-                function id(obj) {
-                    if (!('id' in obj))
-                        obj.id = sequence++;
-                    return obj.id;
-                }
-
-                function ref(obj) {
-                    let type = null;
-
-                    if (obj instanceof Claim)
-                        type = 'claim';
-                    else if (obj instanceof Relation)
-                        type = 'relation';
-                    else
-                        throw new Error('Unknown type');
-
-                    if (obj.data.compound)
-                        throw new Error('Trying to refer to implementation-artifact compound claim');
-
-                    return {isa: type, id: id(obj)};
-                }
-
-                // Reset sequence to the maximum ID we already encountered
-                sequence = diagram.claims.concat(diagram.relations).reduce((max, obj) => {
-                    return 'id' in obj ? Math.max(obj.id) : max
-                }, 0) + 1;
-
-                let json = {
-                    isa: 'diagram',
-                    claims: diagram.claims
-                        .filter(claim => !claim.data.compound)
-                        .map(claim => ({
-                            isa: 'claim',
-                            id: id(claim),
-                            text: claim.text
-                        })),
-                    relations: diagram.relations.reduce((acc, relation) => {
-                        if (relation.target.data.compound)
-                            return acc;
-
-                        return acc.concat([
-                            {
-                                isa: 'relation',
-                                id: id(relation),
-                                sources: relation.data.merged
-                                    ? diagram.relations
-                                        .filter(rel => rel.target === relation.claim)
-                                        .map(rel => rel.claim)
-                                        .map(ref)
-                                    : [ref(relation.claim)],
-                                target: ref(relation.target),
-                                type: relation.type
-                            }
-                        ]);
-                    }, [])
-                };
-
-                let request = fetch('/api/evaluation', { {# ADDED #}
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        'diagram': json
-                    })
-                });
-
-                let data = request.then(resp => resp.json());
-
-                // If there is an error, print it
-                data.then(json => {
-                    if (json.error)
-                        alert(json.error);
-                });
+                {#let sequence = 0;#}
+                {##}
+                {#function id(obj) {#}
+                {#    if (!('id' in obj))#}
+                {#        obj.id = sequence++;#}
+                {#    return obj.id;#}
+                {# }#}
+                {##}
+                {#function ref(obj) {#}
+                {#    let type = null;#}
+                {##}
+                {#    if (obj instanceof Claim)#}
+                {#        type = 'claim';#}
+                {#    else if (obj instanceof Relation)#}
+                {#        type = 'relation';#}
+                {#    else#}
+                {#        throw new Error('Unknown type');#}
+                {##}
+                {#    if (obj.data.compound)#}
+                {#        throw new Error('Trying to refer to implementation-artifact compound claim');#}
+                {##}
+                {#    return {isa: type, id: id(obj)};#}
+                {# }#}
+                {##}
+                {#// Reset sequence to the maximum ID we already encountered#}
+                {#sequence = diagram.claims.concat(diagram.relations).reduce((max, obj) => {#}
+                {#    return 'id' in obj ? Math.max(obj.id) : max#}
+                {# }, 0) + 1;#}
+                {##}
+                {#let json = {#}
+                {#    isa: 'diagram',#}
+                {#    claims: diagram.claims#}
+                {#        .filter(claim => !claim.data.compound)#}
+                {#        .map(claim => ({#}
+                {#            isa: 'claim',#}
+                {#            id: id(claim),#}
+                {#            text: claim.text#}
+                {#        })),#}
+                {#    relations: diagram.relations.reduce((acc, relation) => {#}
+                {#        if (relation.target.data.compound)#}
+                {#            return acc;#}
+                {##}
+                {#        return acc.concat([#}
+                {#            {#}
+                {#                isa: 'relation',#}
+                {#                id: id(relation),#}
+                {#                sources: relation.data.merged#}
+                {#                    ? diagram.relations#}
+                {#                        .filter(rel => rel.target === relation.claim)#}
+                {#                        .map(rel => rel.claim)#}
+                {#                        .map(ref)#}
+                {#                    : [ref(relation.claim)],#}
+                {#                target: ref(relation.target),#}
+                {#                type: relation.type#}
+                {#            }#}
+                {#        ]);#}
+                {#    }, [])#}
+                {# };#}
+                {##}
+                {#let request = fetch('/api/evaluation', { {# ADDED #}
+                {#    method: 'POST',#}
+                {#    headers: {#}
+                {#        'Accept': 'application/json',#}
+                {#        'Content-Type': 'application/json'#}
+                {#    },#}
+                {#    body: JSON.stringify({#}
+                {#        'diagram': json#}
+                {#    })#}
+                {# });#}
+                {##}
+                {#let data = request.then(resp => resp.json());#}
+                {##}
+                {#// If there is an error, print it#}
+                {#data.then(json => {#}
+                {#    if (json.error)#}
+                {#        alert(json.error);#}
+                {# });#}
 
                 // If there are realisations, print realisation
-                data.then(json => {
-                    if (json.texts)
-                        json.texts.map(createEvaluation)[0].querySelector('textarea').focus(); {# Changed #}
+                {#data.then(json => {#}
+                {#    if (json.texts)#}
+                {#        json.texts.map(createEvaluation)[0].querySelector('textarea').focus(); {# Changed #}
+                {##}
+                {#    if (json.more)#}
+                {#        alert('There are more formulations, but only the first 50 are shown.');#}
+                {# });#}
 
-                    if (json.more)
-                        alert('There are more formulations, but only the first 50 are shown.');
-                });
+                evaluationText = createEvaluationText(diagram);
+
+                createEvaluation(evaluationText);
 
                 // Clear the current one
                 evaluationPanel.clear(); {# Changed #}
             });
+
+            function createEvaluationText(diagram) { // ADDED
+
+
+                return diagram.claims[1].text;
+            }
 
 			document.getElementById('save-diagram-btn').addEventListener('click', e => {
 				if (!diagramPanel.selectedTab)
