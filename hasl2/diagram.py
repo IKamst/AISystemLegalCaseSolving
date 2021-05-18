@@ -200,8 +200,9 @@ class Diagram(object):
 
 	def to_arguments(self) -> List[Argument]:
 		# TODO: split up the argument into multiple arguments
-		yield tuple(self.to_argument(claim) for claim in self.find_roots())
+		yield tuple(self.to_argument(claim) for claim in self.find_roots()) # seems to "return" top claim
 
+		# Without the code below only gives realisation of top claim
 		top_warrants = [self.to_warrant({'sources': [claim]}) for claim in self.find_roots() if not self.has_relations(target=claim, type=Type.ATTACK)]
 		
 		# Find all warrant conditions that themselves have conditions
@@ -216,6 +217,27 @@ class Diagram(object):
 						top_warrants.append(self.to_warrant({'sources': [claim._ref]}))
 			i += 1
 		
+		if len(top_warrants) > 0:
+			yield top_warrants
+
+	def to_evaluations(self) -> List[Argument]: # ADDED
+		# TODO: split up the argument into multiple arguments
+		yield tuple(self.to_argument(claim) for claim in self.find_roots())
+
+		top_warrants = [self.to_warrant({'sources': [claim]}) for claim in self.find_roots() if not self.has_relations(target=claim, type=Type.ATTACK)]
+
+		# Find all warrant conditions that themselves have conditions
+		# Use an index as we will add the newly found warrants to the list as
+		# well and we also want to process them.
+		i = 0
+		while i < len(top_warrants):
+			for condition in top_warrants[i].conditions:
+				for claim in condition.claims:
+					if self.has_relations(target=claim._ref, type=Type.CONDITION) \
+							and not self.has_relations(target=claim._ref, type=Type.EXCEPTION):
+						top_warrants.append(self.to_warrant({'sources': [claim._ref]}))
+			i += 1
+
 		if len(top_warrants) > 0:
 			yield top_warrants
 	

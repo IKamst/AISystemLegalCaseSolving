@@ -19,9 +19,9 @@ def diagram_to_texts(diagram):
 			yield realisation
 
 def diagram_to_evaluations(diagram): # ADDED
-	for tree in Diagram.from_object(diagram).to_arguments():
-		for realisation in reverse(tree):
-			yield realisation
+	for tree in Diagram.from_object(diagram).to_evaluations():
+		for evaluation in reverse(tree):
+			yield evaluation
 
 
 app = Flask(__name__, static_folder='../hasl1/static')
