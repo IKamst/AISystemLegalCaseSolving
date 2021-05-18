@@ -18,6 +18,11 @@ def diagram_to_texts(diagram):
 		for realisation in reverse(tree):
 			yield realisation
 
+def diagram_to_evaluations(diagram): # ADDED
+	for tree in Diagram.from_object(diagram).to_arguments():
+		for realisation in reverse(tree):
+			yield realisation
+
 
 app = Flask(__name__, static_folder='../hasl1/static')
 app.secret_key = 'notrelevant'
@@ -33,6 +38,8 @@ def handle_exceptions(fn):
 			response = jsonify(error=str(error))
 			response.status_code = 400
 			return response
+	# Renaming the function name: # ADDED - to fix error "AssertionError: View function mapping is overwriting an existing endpoint function"
+	wrapper.__name__ = fn.__name__
 	return wrapper
 
 @app.route('/')
@@ -60,6 +67,18 @@ def app_diagram_to_text():
 	texts = list()
 	limit_reached = False
 	for text in diagram_to_texts(request.json['diagram']):
+		if len(texts) == 50: # Limit the amount of formulations, as these are a bit explosive
+			limit_reached = True
+			break
+		texts.append(text)
+	return jsonify(texts=texts, more=limit_reached)
+
+@app.route('/api/evaluation', methods=['POST']) # ADDED (all of this)
+@handle_exceptions
+def app_diagram_to_evaluation():
+	texts = list()
+	limit_reached = False
+	for text in diagram_to_evaluations(request.json['diagram']):
 		if len(texts) == 50: # Limit the amount of formulations, as these are a bit explosive
 			limit_reached = True
 			break
