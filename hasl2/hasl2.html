@@ -705,7 +705,7 @@
                     return concludingClaims;
                 }
 
-                updateConcludingClaims(claim) { // ADDED
+                updateConcludingClaims(claim) { // ADDED, only works yet for conjunction
                     this.claims.forEach(someClaim => { // Go through all claims
                         if (this.findConcludingClaims().includes(someClaim)) { // This is a concluding claim
                             let relations = this.findRelations([{target: someClaim}]);
@@ -2086,7 +2086,7 @@
 
             function composeEvaluationText(diagram) { // ADDED, now only works well for 1 concluding claim
                 let evaluationText = composeConclusion(diagram);
-
+                evaluationText = evaluationText.concat(composeArgumentation(diagram));
                 return evaluationText;
             }
 
@@ -2100,10 +2100,56 @@
                     } else {
                         conclusionText = "It is not the case that "
                     }
-                    conclusionText = conclusionText.concat(someClaim.text.toLowerCase(), ".");
+                    conclusionText = conclusionText.concat(someClaim.text.toLowerCase(), ". ");
                 });
                 return conclusionText;
             }
+
+            function composeArgumentation(diagram) { // ADDED, now only works well for 1 concluding claim and a conjunctionn argumentation type
+                let argumentationText;
+                diagram.findConcludingClaims().forEach(someClaim => {
+                    let relations = diagram.findRelations([{target: someClaim}]);
+                    relations.forEach(relation => {
+                        if (relation.claim.text === '&') { // conjunction
+                            argumentationText = composeConjunctiveArgumentation(diagram, relation);
+                        } // Add disjunction or smth as well
+                     });
+                });
+                return argumentationText;
+            }
+
+            function composeConjunctiveArgumentation(diagram, relation) {
+                let argumentationText = "This is because";
+                let conjunctiveRelations = diagram.findRelations([{target: relation.claim}]);
+                if (conjunctiveRelations.length > 0) { // There are supportive claims in conjunction
+                    let satisfiedClaims = [];
+                    let unsatisfiedClaims = [];
+                    conjunctiveRelations.forEach(conjunctiveRelation => {
+                        if (!(conjunctiveRelation.claim.satisfaction === "yes")) {
+                            unsatisfiedClaims.push(conjunctiveRelation.claim);
+                        } else {
+                            satisfiedClaims.push(conjunctiveRelation.claim);
+                        }
+                    });
+                    if ((satisfiedClaims.length > 0) && (unsatisfiedClaims.length > 0)) {
+                        argumentationText = argumentationText.concat(", while ");
+                    } else {
+                        argumentationText = argumentationText.concat(" ");
+                    }
+                    let claimIndex;
+                    for (claimIndex = 0; claimIndex < satisfiedClaims.length; claimIndex++) {
+                        if (claimIndex === 0) {
+                            argumentationText = argumentationText.concat("it is true that ", satisfiedClaims[claimIndex].text.toLowerCase(), ", ");
+                        } else if (claimIndex === (satisfiedClaims.length - 2)) {
+                            argumentationText = argumentationText.concat(satisfiedClaims[claimIndex].text.toLowerCase(), " and ");
+                        } else {
+                            argumentationText = argumentationText.concat(satisfiedClaims[claimIndex].text.toLowerCase(), ", ");
+                        }
+                    }
+                }
+                return argumentationText;
+            }
+
 
 			document.getElementById('save-diagram-btn').addEventListener('click', e => {
 				if (!diagramPanel.selectedTab)
