@@ -158,7 +158,7 @@
 			}
 		</style>
 	</head>
-	<body>
+    <body>
 		<nav class="navbar navbar-default">
 			<div class="container">
 				<div class="navbar-header">
@@ -310,6 +310,8 @@
                     this._text = text;
                     this.data = data || {};
                     this.satisfaction = "unknown"; // ADDED
+                    this.caseInformation = ""; // ADDED
+                    this.caseLines = null;
                     this.ax = 0;
                     this.ay = 0;
                     this.dx = 0;
@@ -343,7 +345,6 @@
 
                 set text(text) {
                     this._text = text;
-                    this.lines = null;
                     this.width = null;
                     this.height = null;
                 }
@@ -1107,6 +1108,13 @@
                                 }
                             });
                             break;
+                        case 65: // a ADDED
+                            this.selectedClaims.forEach(claim => {
+                                claim.caseInformation = prompt("Matching case information:", claim.caseInformation);
+                                e.preventDefault();
+                                this.update();
+                            });
+                            break;
                     }
                 }
 
@@ -1189,8 +1197,11 @@
                     this.context.font = (this.style.scale * this.style.claim.fontSize) + 'px sans-serif';
 
                     this.claims.forEach(claim => {
-                        if (!Array.isArray(claim.lines))
+                        if (!Array.isArray(claim.lines)) { // Hoezo dit in if statement?
                             claim.lines = this.context.wrapText(claim.text, this.style.claim.maxWidth);
+                        }
+
+                        claim.caseLines = this.context.wrapText(claim.caseInformation, this.style.claim.maxWidth); // ADDED
 
                         if (claim.width === null || claim.height === null) {
                             if (claim.data.compound) {
@@ -1198,10 +1209,13 @@
                                 claim.height = 0;
                             } else {
                                 let textWidth = claim.lines.map(line => this.context.measureText(line).width).max();
+                                let alternativeTextWidth = claim.caseLines.map(line => this.context.measureText(line).width).max(); // ADDED
+                                textWidth = Math.max(textWidth, alternativeTextWidth); // ADDED
                                 claim.width = textWidth / this.style.scale + this.style.claim.padding.left + this.style.claim.padding.right;
-                                claim.height = claim.lines.length * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom;
+                                claim.height = (claim.lines.length + claim.caseLines.length) * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom; // ADDED claim.height = claim.lines.length * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom;
                             }
                         }
+
                     });
                 }
 
@@ -1212,6 +1226,15 @@
                 draw() {
                     // Update the size of all the claim boxes
                     this.updateClaimSizes();
+
+                    {#this.claims.forEach(claim => {#}
+                    {#    if (claim.caseInformation !== "") {#}
+                    {#        claim.setSatisfaction("no");#}
+                    {#    }#}
+                    {#    if (claim.caseLines.length > 1) {#}
+                    {#        claim.setSatisfaction("yes");#}
+                    {#    }#}
+                    {# })#}
 
                     // Make sure all the boxes will fit inside the canvas
                     this.updateCanvasSize();
@@ -1338,6 +1361,14 @@
                         // Draw the inner text
                         ctx.fillStyle = fontColor(claim);
                         claim.lines.forEach(function(line, i) {
+                            ctx.fillText(line,
+                                scale * (claim.x + padding.left),
+                                scale * (claim.y + padding.top + (i + 1) * lineHeight));
+                        });
+
+                        // Draw case information ADDED!
+                        ctx.fillStyle = fontColor(claim);
+                        claim.caseLines.forEach(function(line, i) {
                             ctx.fillText(line,
                                 scale * (claim.x + padding.left),
                                 scale * (claim.y + padding.top + (i + 1) * lineHeight));
