@@ -309,7 +309,7 @@
                     this.graph = graph;
                     this._text = text;
                     this.data = data || {};
-                    this.satisfaction = "unknown"; // ADDED
+                    this.satisfaction = "no"; // ADDED
                     this.caseInformation = ""; // ADDED
                     this.caseLines = null;
                     this.ax = 0;
@@ -2119,7 +2119,8 @@
             document.getElementById('evaluate-btn').addEventListener('click', e => { {# ADDED #}
                 let diagram = diagramPanel.selectedTab.diagram;
 
-                var evaluationText = composeEvaluationText(diagram);
+                {#var evaluationText = composeEvaluationText(diagram);#}
+                var evaluationText = composeEvaluationTextNEW(diagram);
 
                 // Clear the current one
                 evaluationPanel.clear();
@@ -2127,6 +2128,81 @@
                 createEvaluation(evaluationText);
 
             });
+
+            function composeEvaluationTextNEW(diagram) { // ADDED
+                let evaluationText = composeConclusionNEW(diagram);
+                evaluationText = evaluationText.concat(composeArgumentationNEW(diagram));
+                return evaluationText;
+            }
+
+            function composeConclusionNEW(diagram) { // ADDED
+                let conclusionText = "";
+                diagram.findConcludingClaims().forEach(someClaim => {
+                    if (someClaim.satisfaction === "yes") {
+                        conclusionText = "In conclusion, it is true that ";
+                    } else {
+                        conclusionText = "In conclusion, it is not true that "
+                    }
+                    conclusionText = conclusionText.concat(someClaim.caseInformation.toLowerCase(), ". ");
+                });
+                return conclusionText;
+            }
+
+            function composeArgumentationNEW(diagram) { // ADDED
+                let argumentationText = "After all, ";
+                argumentationText = argumentationText.concat(realisationPanel.selectedTab.querySelector('textarea').value.toLowerCase(), " ");
+                diagram.findConcludingClaims().forEach(someClaim => {
+                    let relations = diagram.findRelations([{target: someClaim}]);
+                    relations.forEach(relation => {
+                        if (relation.claim.text === '&') { // conjunction
+                            let conjunctiveRelations = diagram.findRelations([{target: relation.claim}]);
+                            if (conjunctiveRelations.length > 0) { // There are supportive claims in conjunction
+                                argumentationText = argumentationText.concat(composeConjunctiveArgumentationNEW(diagram, conjunctiveRelations));
+                            }
+                        } // Add disjunction or smth as well
+                    });
+                });
+                return argumentationText;
+            }
+
+            function composeConjunctiveArgumentationNEW(diagram, conjunctiveRelations) { // ADDED
+                let argumentationText = "";
+                let satisfiedClaims = [];
+                let unsatisfiedClaims = [];
+                conjunctiveRelations.forEach(conjunctiveRelation => {
+                    if (!(conjunctiveRelation.claim.satisfaction === "yes")) {
+                        unsatisfiedClaims.push(conjunctiveRelation.claim);
+                    } else {
+                        satisfiedClaims.push(conjunctiveRelation.claim);
+                    }
+                 });
+                argumentationText = argumentationText.concat(composeConjunctiveArgumentsNEW(diagram, satisfiedClaims));
+                argumentationText = argumentationText.concat(composeConjunctiveArgumentsNEW(diagram, unsatisfiedClaims));
+                return argumentationText;
+            }
+
+            function composeConjunctiveArgumentsNEW(diagram, claims) { // ADDED
+                let argumentationText = "";
+                let claimIndex;
+                for (claimIndex = 0; claimIndex < claims.length; claimIndex++) {
+                    if (claimIndex === 0) {
+                        if (claims[0].satisfaction === "yes") {
+                            argumentationText = argumentationText.concat("In this case ");
+                        } else {
+                            argumentationText = argumentationText.concat("Importantly however, ");
+                        }
+                    } else if (claimIndex === (claims.length - 1) && (claims.length > 2)) {
+                        argumentationText = argumentationText.concat("Lastly, ");
+                    } else {
+                        argumentationText = argumentationText.concat("Also, ");
+                    }
+                    if (claims[claimIndex].satisfaction !== "yes") {
+                        argumentationText = argumentationText.concat("it has not been proven that ")
+                    }
+                    argumentationText = argumentationText.concat(claims[claimIndex].text.toLowerCase(), " as ", claims[claimIndex].caseInformation.toLowerCase(), ". ")
+                 }
+                return argumentationText;
+            }
 
             function composeEvaluationText(diagram) { // ADDED, now only works well for 1 concluding claim
                 let evaluationText = composeConclusion(diagram);
