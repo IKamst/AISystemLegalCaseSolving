@@ -548,13 +548,13 @@
                             maxWidth: 300,
                             background: function(claim) { // ADDED (changed)
                                 if (claim.satisfaction == "yes") {
-                                    return 'green';
+                                    return 'lightgreen';
                                 }
                                 else if (claim.satisfaction == "no") {
-                                    return 'red';
+                                    return 'lightcoral';
                                 }
                                 else if (claim.satisfaction == "unknown") {
-                                    return 'yellow';
+                                    return 'lightgoldenrodyellow';
                                 }
                                 else {
                                     return 'purple'
@@ -1203,18 +1203,29 @@
 
                         claim.caseLines = this.context.wrapText(claim.caseInformation, this.style.claim.maxWidth); // ADDED
 
-                        if (claim.width === null || claim.height === null) {
-                            if (claim.data.compound) {
-                                claim.width = 0;
-                                claim.height = 0;
-                            } else {
-                                let textWidth = claim.lines.map(line => this.context.measureText(line).width).max();
-                                let alternativeTextWidth = claim.caseLines.map(line => this.context.measureText(line).width).max(); // ADDED
-                                textWidth = Math.max(textWidth, alternativeTextWidth); // ADDED
-                                claim.width = textWidth / this.style.scale + this.style.claim.padding.left + this.style.claim.padding.right;
-                                claim.height = (claim.lines.length + claim.caseLines.length) * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom; // ADDED claim.height = claim.lines.length * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom;
-                            }
+                        if (claim.data.compound) {
+                            claim.width = 0;
+                            claim.height = 0;
+                        } else {
+                            let textWidth = claim.lines.map(line => this.context.measureText(line).width).max();
+                            let alternativeTextWidth = claim.caseLines.map(line => this.context.measureText(line).width).max(); // ADDED
+                            textWidth = Math.max(textWidth, alternativeTextWidth); // ADDED
+                            claim.width = textWidth / this.style.scale + this.style.claim.padding.left + this.style.claim.padding.right;
+                            claim.height = (claim.lines.length + claim.caseLines.length + 0.5) * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom; // ADDED claim.height = claim.lines.length * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom;
                         }
+
+                        {#if (claim.width === null || claim.height === null) {#}
+                        {#    if (claim.data.compound) {#}
+                        {#        claim.width = 0;#}
+                        {#        claim.height = 0;#}
+                        {#    } else {#}
+                        {#        let textWidth = claim.lines.map(line => this.context.measureText(line).width).max();#}
+                        {#        let alternativeTextWidth = claim.caseLines.map(line => this.context.measureText(line).width).max(); // ADDED#}
+                        {#        textWidth = Math.max(textWidth, alternativeTextWidth); // ADDED#}
+                        {#        claim.width = textWidth / this.style.scale + this.style.claim.padding.left + this.style.claim.padding.right;#}
+                        {#        claim.height = (claim.lines.length + claim.caseLines.length + 0.5) * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom; // ADDED claim.height = claim.lines.length * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom;#}
+                        {#    }#}
+                        {# }#}
 
                     });
                 }
@@ -1355,6 +1366,15 @@
                             scale * claim.width,
                             scale * claim.height);
 
+                        // Draw another border ADDED
+                        ctx.strokeStyle = claimBorder(claim);
+                        ctx.lineWidth = scale * 1;
+                        ctx.strokeRect(
+                            scale * claim.x,
+                            scale * claim.y,
+                            scale * claim.width,
+                            scale * lineHeight * (claim.lines.length + 0.5) + padding.top);
+
                         // Set the font
                         ctx.font = [fontStyle(claim), (scale * fontSize) + 'px','sans-serif'].join(' ');
 
@@ -1367,11 +1387,11 @@
                         });
 
                         // Draw case information ADDED!
-                        ctx.fillStyle = fontColor(claim);
+                        ctx.fillStyle = 'dimgrey';
                         claim.caseLines.forEach(function(line, i) {
                             ctx.fillText(line,
                                 scale * (claim.x + padding.left),
-                                scale * (claim.y + padding.top + (i + 1) * lineHeight));
+                                scale * (claim.y + padding.top + (i + 1) * lineHeight + (claim.lines.length + 0.5) * lineHeight));
                         });
                     });
                 }
