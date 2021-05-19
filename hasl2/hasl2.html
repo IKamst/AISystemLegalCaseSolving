@@ -2091,11 +2091,9 @@
             }
 
             function composeConclusion(diagram) { // ADDED, now only works well for 1 concluding claim
-                let conclusionText;
+                let conclusionText = "";
                 diagram.findConcludingClaims().forEach(someClaim => {
-                    if (someClaim.satisfaction === "unknown") {
-                        conclusionText = "It is unknown whether or not it is the case that ";
-                    } else if (someClaim.satisfaction === "yes") {
+                    if (someClaim.satisfaction === "yes") {
                         conclusionText = "It is the case that ";
                     } else {
                         conclusionText = "It is not the case that "
@@ -2106,50 +2104,64 @@
             }
 
             function composeArgumentation(diagram) { // ADDED, now only works well for 1 concluding claim and a conjunctionn argumentation type
-                let argumentationText;
+                let argumentationText = "";
                 diagram.findConcludingClaims().forEach(someClaim => {
                     let relations = diagram.findRelations([{target: someClaim}]);
                     relations.forEach(relation => {
                         if (relation.claim.text === '&') { // conjunction
-                            argumentationText = composeConjunctiveArgumentation(diagram, relation);
+                            let conjunctiveRelations = diagram.findRelations([{target: relation.claim}]);
+                            if (conjunctiveRelations.length > 0) { // There are supportive claims in conjunction
+                                argumentationText = composeConjunctiveArgumentation(diagram, conjunctiveRelations);
+                            }
                         } // Add disjunction or smth as well
                      });
                 });
                 return argumentationText;
             }
 
-            function composeConjunctiveArgumentation(diagram, relation) {
+            function composeConjunctiveArgumentation(diagram, conjunctiveRelations) {
                 let argumentationText = "This is because";
-                let conjunctiveRelations = diagram.findRelations([{target: relation.claim}]);
-                if (conjunctiveRelations.length > 0) { // There are supportive claims in conjunction
-                    let satisfiedClaims = [];
-                    let unsatisfiedClaims = [];
-                    conjunctiveRelations.forEach(conjunctiveRelation => {
-                        if (!(conjunctiveRelation.claim.satisfaction === "yes")) {
-                            unsatisfiedClaims.push(conjunctiveRelation.claim);
-                        } else {
-                            satisfiedClaims.push(conjunctiveRelation.claim);
-                        }
-                    });
-                    if ((satisfiedClaims.length > 0) && (unsatisfiedClaims.length > 0)) {
-                        argumentationText = argumentationText.concat(", while ");
+                let satisfiedClaims = [];
+                let unsatisfiedClaims = [];
+                conjunctiveRelations.forEach(conjunctiveRelation => {
+                    if (!(conjunctiveRelation.claim.satisfaction === "yes")) {
+                        unsatisfiedClaims.push(conjunctiveRelation.claim);
                     } else {
-                        argumentationText = argumentationText.concat(" ");
+                        satisfiedClaims.push(conjunctiveRelation.claim);
                     }
-                    let claimIndex;
-                    for (claimIndex = 0; claimIndex < satisfiedClaims.length; claimIndex++) {
-                        if (claimIndex === 0) {
-                            argumentationText = argumentationText.concat("it is true that ", satisfiedClaims[claimIndex].text.toLowerCase(), ", ");
-                        } else if (claimIndex === (satisfiedClaims.length - 2)) {
-                            argumentationText = argumentationText.concat(satisfiedClaims[claimIndex].text.toLowerCase(), " and ");
-                        } else {
-                            argumentationText = argumentationText.concat(satisfiedClaims[claimIndex].text.toLowerCase(), ", ");
-                        }
-                    }
+                });
+                if ((satisfiedClaims.length > 0) && (unsatisfiedClaims.length > 0)) {
+                    argumentationText = argumentationText.concat(", while ");
+                } else {
+                    argumentationText = argumentationText.concat(" ");
                 }
+                argumentationText = argumentationText.concat(composeConjunctiveArguments(diagram, satisfiedClaims));
+                if ((satisfiedClaims.length > 0) && (unsatisfiedClaims.length > 0)) {
+                    argumentationText = argumentationText.concat(", ");
+                }
+                argumentationText = argumentationText.concat(composeConjunctiveArguments(diagram, unsatisfiedClaims));
+                argumentationText = argumentationText.concat(". ");
                 return argumentationText;
             }
 
+            function composeConjunctiveArguments(diagram, claims) {
+                let argumentationText = "";
+                let claimIndex;
+                for (claimIndex = 0; claimIndex < claims.length; claimIndex++) {
+                    if (claimIndex === 0) {
+                        if (claims[0].satisfaction === "yes") {
+                            argumentationText = argumentationText.concat("it is true that ", claims[claimIndex].text.toLowerCase());
+                        } else {
+                            argumentationText = argumentationText.concat("it is not true that ", claims[claimIndex].text.toLowerCase());
+                        }
+                    } else if (claimIndex === (claims.length - 1)) {
+                        argumentationText = argumentationText.concat(" and that ", claims[claimIndex].text.toLowerCase());
+                    } else {
+                        argumentationText = argumentationText.concat(", that ", claims[claimIndex].text.toLowerCase());
+                    }
+                 }
+                return argumentationText;
+            }
 
 			document.getElementById('save-diagram-btn').addEventListener('click', e => {
 				if (!diagramPanel.selectedTab)
