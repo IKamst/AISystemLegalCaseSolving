@@ -46,12 +46,6 @@
                 flex-direction: column;
 			}
 
-            .evaluation-panel { {# ADDED #}
-                flex: 1 1;
-                display: flex;
-                border-top: 1px solid #ccc;;
-            }
-
 			.text-panel {
 				border-right: 1px solid #ccc;
 			}
@@ -196,12 +190,10 @@
 						<button id="add-realisation-tab" title="New text panel">+</button>
 					</ol>
 				</div>
-                <div class="evaluation-panel"> {# ADDED #}
-                    <div id="evaluation-panel" class="evaluations"> {# ADDED #}
-                        <ol class="tab-list">
-                            <button id="add-evaluation-tab" title="New evaluation panel">+</button>
-                        </ol>
-                    </div>
+                <div id="evaluation-panel" class="evaluations" style="border-top:1px solid #ccc"> {# ADDED #}
+                    <ol class="tab-list">
+                        <button id="add-evaluation-tab" title="New evaluation panel">+</button>
+                    </ol>
                 </div>
 			</div>
 			<div class="diagram-panel">
@@ -1764,7 +1756,7 @@
 			}
 
             function createEvaluation(text, n) { {# ADDED #}
-                const tab = realisationPanel.createTab('Evaluation' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
+                const tab = evaluationPanel.createTab('Evaluation' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
                 const textarea = document.createElement('textarea');
                 {#textarea.placeholder = 'Type your argumentative text here…';#}
                 textarea.value = text || '';
@@ -2078,10 +2070,11 @@
 
                 var evaluationText = composeEvaluationText(diagram);
 
-                createEvaluation(evaluationText);
-
                 // Clear the current one
                 evaluationPanel.clear();
+
+                createEvaluation(evaluationText);
+
             });
 
             function composeEvaluationText(diagram) { // ADDED, now only works well for 1 concluding claim
@@ -2248,6 +2241,8 @@
 			createRealisation();
 
 			createDiagram();
+
+			createEvaluation(); // ADDED
 
 		</script>
 	</body>
