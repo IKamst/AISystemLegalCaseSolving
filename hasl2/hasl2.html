@@ -553,9 +553,6 @@
                                 else if (claim.satisfaction == "no") {
                                     return 'lightcoral';
                                 }
-                                else if (claim.satisfaction == "unknown") {
-                                    return 'lightgoldenrodyellow';
-                                }
                                 else {
                                     return 'purple'
                                 }
@@ -698,79 +695,55 @@
                     return concludingClaims;
                 }
 
+                // When a claim's satisfaction changes, go through all claims and see if they are influenced
                 updateConcludingClaims(claim) { // ADDED, only works yet for conjunction
                     this.claims.forEach(someClaim => { // Go through all claims
                         if (this.findConcludingClaims().includes(someClaim)) { // This is a concluding claim
                             let relations = this.findRelations([{target: someClaim}]);
                             relations.forEach(relation => {
                                 if (relation.claim.text === '&') { // conjunction
-                                    let compoundRelations = this.findRelations([{claim: claim, target: relation.claim}]);
-                                    if (compoundRelations.length > 0) { // found a concluding claim for which the current claim is effective
-                                        let broken = false;
-                                        let allCompoundRelations = this.findRelations([{target: relation.claim}]);
-                                        allCompoundRelations.forEach(compoundRelation => {
-                                            // all effective claims should be true and supportive for the concl claim to be true
-                                            if (!(compoundRelation.claim.satisfaction === "yes")) {
-                                                someClaim.setSatisfaction("no");
-                                                broken = true;
-                                            }
-                                        });
-                                        if (broken === false) {
-                                            someClaim.setSatisfaction("yes");
-                                        }
-                                    }
-                                } else { // disjunction
-
+                                    this.updateConjunctiveClaims(claim, someClaim, relation);
+                                } else if (relation.claim === claim) { // disjunction
+                                    this.updateDisjunctiveClaims(claim, someClaim, relation);
                                 }
-
                             });
-
-
-
-                            {#if (!(relations.length == 0)) { // the claim is affecting the concluding claim#}
-                            {#    this.claims.forEach(possiblyEffectiveClaim => {#}
-                            {#        let effectiveRelations = this.findRelations([{claim: possiblyEffectiveClaim, target: someClaim}]);#}
-                            {#        if (!(effectiveRelations.length == 0)) { // found a relation that we want!#}
-                            {#            if (!(possiblyEffectiveClaim.satisfaction == "yes")) {#}
-                            {#                someClaim.setSatisfaction("no");#}
-                            {#            }#}
-                            {#        }#}
-                            {#    });#}
-                            {# }#}
                         }
                     });
-                        {#if (!(this.findConcludingClaims().includes(claim))) {#}
-                        {#    claim.setSatisfaction("yes");#}
-                        {#    e.preventDefault();#}
-                        {#    this.update();#}
-                        {#    this.updateConcludingClaims(claim);#}
-                        {#    e.preventDefault();#}
-                        {#    this.update();#}
-                        {# }#}
-                    {#this.findConcludingClaims().forEach(concludingClaim => {#}
-                    {#    let relations = this.findRelations([{claim: claim, target: concludingClaim}]);#}
-                    {#    if (!(relations.length === 0)) {#}
-                    {#        this.findRelations([{target: concludingClaim}]).forEach(otherRelation => {#}
-                    {#            if (!(otherRelation.claim.satisfaction === "yes")) {#}
-                    {#                concludingClaim.setSatisfaction("no");#}
-                    {#            }#}
-                    {#        })#}
-                    {#    }#}
-                    {# })#}
-                    {#for (const [conclusionIndex, conclusionEl] of this.findRelations([{claim: claim}]).entries()) { // go through all relations in which the given claim is the effective claim#}
-                    {#    let effectiveClaims = [];#}
-                    {#    if (conclusionEl.target instanceof Claim) { // make sure target is not a relationship itself#}
-                    {#        conclusionEl.target.setSatisfaction("no");#}
-                    {#        for (const [relationIndex, relationEl] of this.findRelations([{target: conclusionEl.target}]).entries()) { // go through all claims that lead to the concluding claim#}
-                    {#            effectiveClaims.push(relationEl.claim); // find all effective claims for the concluding claim#}
-                    {#        }#}
-                    {#        if (effectiveClaims.every(effectiveClaim => effectiveClaim.satisfaction === "yes")) { // if all effective claims are satisfied, the concluding claim is satisfied#}
-                    {#            conclusionEl.target.setSatisfaction("yes");#}
-                    {#        } else { // else it is not satisfied#}
-                    {#            conclusionEl.target.setSatisfaction("no");#}
-                    {#        }#}
-                    {#    }#}
-                    {# }#}
+                }
+
+                updateConjunctiveClaims(claim, someClaim, relation) {  // ADDED
+                    let compoundRelations = this.findRelations([{claim: claim, target: relation.claim}]);
+                    if (compoundRelations.length > 0) { // found a concluding claim for which the current claim is effective
+                        let broken = false;
+                        let allCompoundRelations = this.findRelations([{target: relation.claim}]);
+                        allCompoundRelations.forEach(compoundRelation => {
+                            // all effective claims should be true and supportive for the concl claim to be true
+                            if (!(compoundRelation.claim.satisfaction === "yes")) {
+                                someClaim.setSatisfaction("no");
+                                broken = true;
+                            }
+                        });
+                        if (broken === false) {
+                            someClaim.setSatisfaction("yes");
+                        }
+                    }
+                }
+
+                updateDisjunctiveClaims(claim, someClaim) {
+                    if (claim.satisfaction === "yes") {
+                        someClaim.setSatisfaction("yes");
+                    } else {
+                        let disjunctiveSatisfaction = false;
+                        let disjunctiveRelations = this.findRelations([{target: someClaim}]);
+                        disjunctiveRelations.forEach(disjunctiveRelation => {
+                            if (!(disjunctiveRelation.claim.text === '&') && (disjunctiveRelation.claim.satisfaction === "yes")) {
+                                disjunctiveSatisfaction = true;
+                            }
+                        });
+                        if (disjunctiveSatisfaction === false) {
+                            someClaim.setSatisfaction("no");
+                        }
+                    }
                 }
 
                 findContext(claim) {
@@ -1088,18 +1061,6 @@
                             this.selectedClaims.forEach(claim => {
                                 if (!(this.findConcludingClaims().includes(claim))) {
                                     claim.setSatisfaction("no");
-                                    e.preventDefault();
-                                    this.update();
-                                    this.updateConcludingClaims(claim);
-                                    e.preventDefault();
-                                    this.update();
-                                }
-                            });
-                            break;
-                        case 85: // u ADDED
-                            this.selectedClaims.forEach(claim => {
-                                if (!(this.findConcludingClaims().includes(claim))) {
-                                    claim.setSatisfaction("unknown");
                                     e.preventDefault();
                                     this.update();
                                     this.updateConcludingClaims(claim);
@@ -2118,9 +2079,19 @@
 
             document.getElementById('evaluate-btn').addEventListener('click', e => { {# ADDED #}
                 let diagram = diagramPanel.selectedTab.diagram;
+                let complexEvaluation = true;
+                var evaluationText = null;
 
-                {#var evaluationText = composeEvaluationText(diagram);#}
-                var evaluationText = composeEvaluationTextNEW(diagram);
+                diagram.findConcludingClaims().forEach(someClaim => {
+                    if (!(/\S/.test(someClaim.caseInformation))) {
+                        evaluationText = composeEvaluationText(diagram);
+                        complexEvaluation = false;
+                    }
+                })
+
+                if (complexEvaluation === true) {
+                    evaluationText = composeEvaluationTextNEW(diagram);
+                }
 
                 // Clear the current one
                 evaluationPanel.clear();
@@ -2199,10 +2170,16 @@
                     if (claims[claimIndex].satisfaction !== "yes") {
                         argumentationText = argumentationText.concat("it has not been proven that ")
                     }
-                    argumentationText = argumentationText.concat(claims[claimIndex].text.toLowerCase(), " as ", claims[claimIndex].caseInformation.toLowerCase(), ". ")
+                    argumentationText = argumentationText.concat(claims[claimIndex].text.toLowerCase());
+                    if (/\S/.test(claims[claimIndex].caseInformation)) {
+                        argumentationText = argumentationText.concat(" as ", claims[claimIndex].caseInformation.toLowerCase());
+                    }
+                    argumentationText = argumentationText.concat(". ");
                  }
                 return argumentationText;
             }
+
+            // For simple evaluation
 
             function composeEvaluationText(diagram) { // ADDED, now only works well for 1 concluding claim
                 let evaluationText = composeConclusion(diagram);
