@@ -707,56 +707,49 @@
                     return influencedClaims;
                 }
 
-                // When a claim's satisfaction changes, go through all claims and see if they are influenced
-                updateConcludingClaims(claim) { // ADDED, only works yet for conjunction
-                    this.claims.forEach(someClaim => { // Go through all claims
-                        if (this.findConcludingClaims().includes(someClaim)) { // This is a concluding claim
-                            let relations = this.findRelations([{target: someClaim}]);
-                            let satisfaction = false;
-                            relations.forEach(relation => {
-                                if (relation.claim.text === '&') { // conjunction
-                                    this.updateConjunctiveClaims(claim, someClaim, relation);
-                                } else if (relation.claim === claim) { // disjunction
-                                    this.updateDisjunctiveClaims(claim, someClaim, relation);
-                                }
+                // When a claim's satisfaction changes, go through relevant claims and see if they are influenced
+                updateInfluencedClaims(claim) { // ADDED
+
+                    // Find out which claims are influenced by the claim and therefore relevant
+                    let relevantRelations = this.findRelations([{claim: claim}]);
+                    let relevantClaims = [];
+                    relevantRelations.forEach(relevantRelation => {
+                        if (relevantRelation.target.text === "&") {
+                            this.findRelations([{claim: relevantRelation.target}]).forEach(conjunctiveRelation => {
+                                relevantClaims.push(conjunctiveRelation.target);
                             });
+                        } else {
+                           relevantClaims.push(relevantRelation.target);
                         }
                     });
-                }
 
-                updateConjunctiveClaims(claim, someClaim, relation) {  // ADDED
-                    let compoundRelations = this.findRelations([{claim: claim, target: relation.claim}]);
-                    if (compoundRelations.length > 0) { // found a concluding claim for which the current claim is effective
-                        let broken = false;
-                        let allCompoundRelations = this.findRelations([{target: relation.claim}]);
-                        allCompoundRelations.forEach(compoundRelation => {
-                            // all effective claims should be true and supportive for the concl claim to be true
-                            if (!(compoundRelation.claim.satisfaction === "yes")) {
-                                someClaim.setSatisfaction("no");
-                                broken = true;
-                            }
-                        });
-                        if (broken === false) {
-                            someClaim.setSatisfaction("yes");
-                        }
-                    }
-                }
+                    // Go through the relevant claims and see if they are satisfied
+                    relevantClaims.forEach(relevantClaim => {
+                       let supportingRelations = this.findRelations([{target: relevantClaim}]);
+                       let satisfaction = "no";
+                       let i;
+                       for (i = 0; i < supportingRelations.length; i++) {
+                           if ((supportingRelations[i].claim.text !== "&") && (supportingRelations[i].claim.satisfaction === "yes")) {
+                               satisfaction = "yes";
+                               break;
+                           } else if (supportingRelations[i].claim.text === "&") {
+                               let nSatisfied = 0;
+                               let conjunctiveSupportingRelations = this.findRelations([{target: supportingRelations[i].claim}]);
+                               conjunctiveSupportingRelations.forEach(conjunctiveSupportingRelation => {
+                                   if (conjunctiveSupportingRelation.claim.satisfaction === "yes") {
+                                       nSatisfied++;
+                                   }
+                               });
+                               if (conjunctiveSupportingRelations.length === nSatisfied) {
+                                   satisfaction = "yes";
+                                   break;
+                               }
+                           }
 
-                updateDisjunctiveClaims(claim, someClaim) {
-                    if (claim.satisfaction === "yes") {
-                        someClaim.setSatisfaction("yes");
-                    } else {
-                        let disjunctiveSatisfaction = false;
-                        let disjunctiveRelations = this.findRelations([{target: someClaim}]);
-                        disjunctiveRelations.forEach(disjunctiveRelation => {
-                            if (!(disjunctiveRelation.claim.text === '&') && (disjunctiveRelation.claim.satisfaction === "yes")) {
-                                disjunctiveSatisfaction = true;
-                            }
-                        });
-                        if (disjunctiveSatisfaction === false) {
-                            someClaim.setSatisfaction("no");
-                        }
-                    }
+                       }
+                       relevantClaim.setSatisfaction(satisfaction);
+                       this.updateInfluencedClaims(relevantClaim);
+                    });
                 }
 
                 findContext(claim) {
@@ -1060,11 +1053,11 @@
 
                         case 86: // v ADDED
                             this.selectedClaims.forEach(claim => {
-                                if (!(this.findConcludingClaims().includes(claim))) {
+                                if (!(this.findInfluencedClaims().includes(claim))) {
                                     claim.setSatisfaction("yes");
                                     e.preventDefault();
                                     this.update();
-                                    this.updateConcludingClaims(claim);
+                                    this.updateInfluencedClaims(claim);
                                     e.preventDefault();
                                     this.update();
                                 }
@@ -1072,11 +1065,11 @@
                             break;
                         case 78: // n ADDED
                             this.selectedClaims.forEach(claim => {
-                                if (!(this.findConcludingClaims().includes(claim))) {
+                                if (!(this.findInfluencedClaims().includes(claim))) {
                                     claim.setSatisfaction("no");
                                     e.preventDefault();
                                     this.update();
-                                    this.updateConcludingClaims(claim);
+                                    this.updateInfluencedClaims(claim);
                                     e.preventDefault();
                                     this.update();
                                 }
@@ -2149,17 +2142,26 @@
                         if (conjunctiveSatisfaction) {
                             satisfiedConjunctiveClaims.push(composeConjunctiveArgumentation(diagram, relation.claim, complex));
                         } else {
-                            unsatisfiedDisjunctiveClaims.push(composeConjunctiveArgumentation(diagram, relation.claim, complex));
+                            unsatisfiedConjunctiveClaims.push(composeConjunctiveArgumentation(diagram, relation.claim, complex));
                         }
                     } else { // underlying claim is independent (disjunction)
-                        if (relation.claim.satisfaction === "yes") {
-                            satisfiedDisjunctiveClaims.push(relation.claim.text.toLowerCase());
+                        let satisfactionPhrase = "";
+                        let unsatisfactionPhrase = "";
+                        if (complex) {
+                            satisfactionPhrase = "it has been proven that ";
+                            unsatisfactionPhrase = "it has not been proven that";
                         } else {
-                            unsatisfiedDisjunctiveClaims.push(relation.claim.text.toLowerCase());
+                            satisfactionPhrase = "it is true that ";
+                            unsatisfactionPhrase = "it is not true that ";
+                        }
+                        if (relation.claim.satisfaction === "yes") {
+                            satisfiedDisjunctiveClaims.push(relation.claim);
+                        } else {
+                            unsatisfiedDisjunctiveClaims.push(relation.claim);
                         }
                     }
                  });
-                return argumentationText.concat(writeOutArgumentation(diagram, satisfiedConjunctiveClaims, unsatisfiedConjunctiveClaims, satisfiedDisjunctiveClaims, unsatisfiedDisjunctiveClaims, complex));
+                return argumentationText.concat(writeOutArgumentation(diagram, satisfiedConjunctiveClaims, unsatisfiedConjunctiveClaims, satisfiedDisjunctiveClaims, unsatisfiedDisjunctiveClaims, someClaim, complex));
             }
 
             // Find out if a conjunction satisfied (i.e. if all of the underlying claims are satisfied)
@@ -2196,83 +2198,168 @@
             // Compose the arguments for the arguments on the conjunctive claims based on if claims are satisfied or not.
             function composeConjunctiveArguments(diagram, satisfiedClaims, unsatisfiedClaims, complex) {
                 let argumentationText = "";
-                let claimIndex;
-                for (claimIndex = 0; claimIndex < satisfiedClaims.length; claimIndex++) {
-                    if (claimIndex === 0) {
-                        if (satisfiedClaims[0].satisfaction === "yes") {
-                            argumentationText = argumentationText.concat("it is true that ", satisfiedClaims[claimIndex].text.toLowerCase());
-                        } else {
-                            argumentationText = argumentationText.concat("it is not true that ", satisfiedClaims[claimIndex].text.toLowerCase());
-                        }
-                    } else if (claimIndex === (satisfiedClaims.length - 1)) {
-                        argumentationText = argumentationText.concat(" and that ", satisfiedClaims[claimIndex].text.toLowerCase());
+
+                if (unsatisfiedClaims.length > 0) { // conjunction is not satisfied
+                    if (complex) {
+                        argumentationText = argumentationText.concat("it is not true that ", unsatisfiedClaims[0].text.toLowerCase(), " as ", unsatisfiedClaims[0].caseInformation.toLowerCase());
                     } else {
-                        argumentationText = argumentationText.concat(", that ", satisfiedClaims[claimIndex].text.toLowerCase());
+                        argumentationText = argumentationText.concat("it is not true that ", unsatisfiedClaims[0].text.toLowerCase());
                     }
-                 }
-                for (claimIndex = 0; claimIndex < unsatisfiedClaims.length; claimIndex++) {
-                    if (claimIndex === 0) {
-                        if (unsatisfiedClaims[0].satisfaction === "yes") {
-                            argumentationText = argumentationText.concat("it is true that ", unsatisfiedClaims[claimIndex].text.toLowerCase());
+                    let allClaims = unsatisfiedClaims.concat(satisfiedClaims);
+                    let i;
+                    // Explain that the rest is irrelevant
+                    for (i = 1; i < allClaims.length; i++) {
+                        if (i === 1) {
+                            argumentationText = argumentationText.concat(". Whether or not it is true that ", allClaims[i].text.toLowerCase());
+                        } else if (i === (allClaims.length - 1)) {
+                            argumentationText = argumentationText.concat(" and that ", allClaims[i].text.toLowerCase());
                         } else {
-                            argumentationText = argumentationText.concat("it is not true that ", unsatisfiedClaims[claimIndex].text.toLowerCase());
+                            argumentationText = argumentationText.concat(", that ", allClaims[i].text.toLowerCase());
                         }
-                    } else if (claimIndex === (unsatisfiedClaims.length - 1)) {
-                        argumentationText = argumentationText.concat(" and that ", unsatisfiedClaims[claimIndex].text.toLowerCase());
-                    } else {
-                        argumentationText = argumentationText.concat(", that ", unsatisfiedClaims[claimIndex].text.toLowerCase());
                     }
-                 }
+                    argumentationText = argumentationText.concat(" is not relevant here");
+                } else if (satisfiedClaims.length > 0) { // conjunction is satisfied
+                    let i;
+                    for (i = 0; i < satisfiedClaims.length; i++) {
+                        if (i === 0) {
+                            if (complex) {
+                                argumentationText = argumentationText.concat("it is true that ", satisfiedClaims[i].text.toLowerCase(), ", after all ", satisfiedClaims[i].caseInformation.toLowerCase(), ", ");
+                            } else {
+                                argumentationText = argumentationText.concat("it is true that ", satisfiedClaims[i].text.toLowerCase());
+                            }
+                        } else if (i === (satisfiedClaims.length - 1)) {
+                            if (complex) {
+                                argumentationText = argumentationText.concat(" and that ", satisfiedClaims[i].text.toLowerCase(), ", after all ", satisfiedClaims[i].caseInformation.toLowerCase());
+                            } else {
+                                argumentationText = argumentationText.concat(" and that ", satisfiedClaims[i].text.toLowerCase());
+                            }
+                        } else {
+                            if (complex) {
+                                argumentationText = argumentationText.concat(", that ", satisfiedClaims[i].text.toLowerCase(), ", after all ", satisfiedClaims[i].caseInformation.toLowerCase(), ", ");
+                            } else {
+                                argumentationText = argumentationText.concat(", that ", satisfiedClaims[i].text.toLowerCase());
+                            }
+                        }
+                    }
+                }
                 return argumentationText;
             }
 
             // Write out the full argumentation with disjunctive and conjunctive claims.
-            function writeOutArgumentation(diagram, satisfiedConjunctiveClaims, unsatisfiedConjunctiveClaims, satisfiedDisjunctiveClaims, unsatisfiedDisjunctiveClaims, complex) {
+            function writeOutArgumentation(diagram, satisfiedConjunctiveClaims, unsatisfiedConjunctiveClaims, satisfiedDisjunctiveClaims, unsatisfiedDisjunctiveClaims, someClaim, complex) {
 
                 let argumentationText = "";
+                let determiningClaims = []; // the claims that determine the outcome directly - explore them
 
                 let linkingPhrase = "Also, ";
                 let finalLinkingPhrase = "Lastly, ";
-                let satisfiedConclusionPhrase = "This alone makes the conclusion satisfied. ";
+                let satisfiedDisjunctiveConclusionPhrase = "This alone makes the conclusion satisfied. ";
+                let satisfiedConjunctiveConclusionPhrase = "This together makes the conclusion satisfied. ";
                 let unsatisfiedConclusionPhrase = "";
-                let satisfactionPhrase = "";
-                let unsatisfactionPhrase = ""
                 if (complex) {
                     argumentationText = argumentationText.concat("In this case, ");
-                    satisfactionPhrase = "it has been proven that ";
-                    unsatisfactionPhrase = "it has not been proven that";
                 } else {
                     argumentationText = argumentationText.concat("After all, ")
-                    satisfactionPhrase = "it is true that ";
-                    unsatisfactionPhrase = "it is not true that ";
                 }
 
                 // The conclusion is satisfied
-                if (satisfiedDisjunctiveClaims.length > 0) {
-                    argumentationText = argumentationText.concat(satisfactionPhrase, satisfiedDisjunctiveClaims[0].text.toLowerCase(), ". ", satisfiedConclusionPhrase);
-                } else if (satisfiedConjunctiveClaims.length > 0) {
-                    argumentationText = argumentationText.concat(satisfiedConjunctiveClaims[0], ". ", satisfiedConclusionPhrase);
-                }
-                if ((satisfiedDisjunctiveClaims.length + satisfiedConjunctiveClaims.length) > 1) {
-                    // More than one satisfied claim: state that the other satisfied claims are not relevant
-                    argumentationText = argumentationText.concat("The fact that other claims are satisfied is not relevant. ");
+                if ((satisfiedDisjunctiveClaims.length + satisfiedConjunctiveClaims.length) > 0) {
+                    let allClaims = findUnderlyingClaims(diagram, someClaim); // string array
+                    if (satisfiedDisjunctiveClaims.length > 0) {
+                        if (complex) {
+                            argumentationText = argumentationText.concat("it is true that ", satisfiedDisjunctiveClaims[0].text.toLowerCase(), " as ", satisfiedDisjunctiveClaims[0].caseInformation.toLowerCase(), ". ", satisfiedDisjunctiveConclusionPhrase);
+                        } else {
+                            argumentationText = argumentationText.concat("it is true that ", satisfiedDisjunctiveClaims[0].text.toLowerCase(), ". ", satisfiedDisjunctiveConclusionPhrase);
+                        }
+                        determiningClaims.push(satisfiedDisjunctiveClaims[0]);
+                        allClaims.splice(allClaims.indexOf(satisfiedDisjunctiveClaims[0].text.toLowerCase()), 1);
+                    } else if (satisfiedConjunctiveClaims.length > 0) {
+                        argumentationText = argumentationText.concat(satisfiedConjunctiveClaims[0], ". ", satisfiedConjunctiveConclusionPhrase);
+                        let relevantConjunctiveClaims = findRelevantConjunctiveClaims(diagram, someClaim);
+                        relevantConjunctiveClaims.forEach(conjunctiveClaim => {
+                            determiningClaims.push(conjunctiveClaim);
+                            allClaims.splice(allClaims.indexOf(conjunctiveClaim.text), 1);
+                        });
+                    }
+                    // Explain that the rest is irrelevant
+                    if (allClaims.length > 0) {
+                        let i;
+                        for (i = 0; i < allClaims.length; i++) {
+                            if (i === 0) {
+                                argumentationText = argumentationText.concat("Whether or not it is true that ", allClaims[i].toLowerCase());
+                            } else if (i === (allClaims.length - 1)) {
+                                argumentationText = argumentationText.concat(" and that ", allClaims[i].toLowerCase());
+                            } else {
+                                argumentationText = argumentationText.concat(", that ", allClaims[i].toLowerCase());
+                            }
+                        }
+                        argumentationText = argumentationText.concat(" is not relevant here. ")
+                    }
                 }
 
                 // The conclusion is not satisfied
-                let unsatisfiedClaims = unsatisfiedDisjunctiveClaims.concat(unsatisfiedConjunctiveClaims);
-                let i;
-                for (i = 0; i < unsatisfiedClaims.length; i++) {
-                    if (i > 0) {
-                        if (i === (unsatisfiedClaims.length - 1)) {
-                            argumentationText = argumentationText.concat(finalLinkingPhrase);
+                if ((satisfiedDisjunctiveClaims.length + satisfiedConjunctiveClaims.length) < 1) {
+                    let i;
+                    for (i = 0; i < (unsatisfiedDisjunctiveClaims.length + unsatisfiedConjunctiveClaims.length); i++) {
+                        // Include linking words
+                        if (i > 0) {
+                            if (i === (unsatisfiedDisjunctiveClaims.length + unsatisfiedConjunctiveClaims.length - 1)) {
+                                argumentationText = argumentationText.concat(finalLinkingPhrase);
+                            } else {
+                                argumentationText = argumentationText.concat(linkingPhrase);
+                            }
+                        }
+                        // Include the claim itself
+                        if (i < unsatisfiedDisjunctiveClaims.length) {
+                            if (complex) {
+                                argumentationText = argumentationText.concat("it is not true that ", unsatisfiedDisjunctiveClaims[i].text.toLowerCase(), " as ", unsatisfiedDisjunctiveClaims[i].caseInformation.toLowerCase(), ". ");
+                            } else {
+                                argumentationText = argumentationText.concat("it is not true that ", unsatisfiedDisjunctiveClaims[i].text.toLowerCase(), ". ");
+                            }
+                            determiningClaims.push(unsatisfiedDisjunctiveClaims[i]);
                         } else {
-                            argumentationText = argumentationText.concat(linkingPhrase);
+                            argumentationText = argumentationText.concat(unsatisfiedConjunctiveClaims[i - unsatisfiedDisjunctiveClaims.length], ". ");
                         }
                     }
-                    argumentationText = argumentationText.concat(unsatisfiedClaims[i], ". ");
                 }
 
+                alert(determiningClaims[0].text);
+
                 return argumentationText;
+            }
+
+            function findUnderlyingClaims(diagram, someClaim) {
+                let underlyingClaims = [];
+                let relations = diagram.findRelations([{target: someClaim}]); // all these relations need to be satisfied for the conclusion to be satisfied
+                relations.forEach(relation => {
+                    if (relation.claim.text === '&') { // underlying claim is a conjunction of claims
+                        let conjunctiveRelations = diagram.findRelations([{target: relation.claim}]);
+                        conjunctiveRelations.forEach(conjunctiveRelation => {
+                            underlyingClaims.push(conjunctiveRelation.claim.text.toLowerCase());
+                        });
+                    } else { // underlying claim is independent (disjunction)
+                        underlyingClaims.push(relation.claim.text.toLowerCase());
+                    }
+                });
+                return underlyingClaims
+            }
+
+            function findRelevantConjunctiveClaims(diagram, someClaim) {
+                let relevantConjunctiveClaims = [];
+                let relations = diagram.findRelations([{target: someClaim}]); // all these relations need to be satisfied for the conclusion to be satisfied
+                let conjunctiveTarget;
+                let i;
+                for (i = 0; i < relations.length; i++) {
+                    if (relations[i].claim.text === "&") {
+                        conjunctiveTarget = relations[i].claim;
+                        break;
+                    }
+                }
+                let underlyingRelations = diagram.findRelations([{target: conjunctiveTarget}]);
+                underlyingRelations.forEach(relation => {
+                    relevantConjunctiveClaims.push(relation.claim);
+                });
+                return relevantConjunctiveClaims;
             }
 
 			document.getElementById('save-diagram-btn').addEventListener('click', e => {
