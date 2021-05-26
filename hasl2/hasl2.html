@@ -2120,6 +2120,28 @@
                 return evaluationText;
             }
 
+            function composeAdditionalEvaluationText(diagram, someClaim) {
+                let evaluationText = "";
+
+                if (someClaim.satisfaction === "yes") {
+                    evaluationText = "It is true that ";
+                } else {
+                    evaluationText = "It is not true that "
+                }
+
+                if (!(/\S/.test(someClaim.caseInformation))) {
+                    // No case is linked, use simple evaluation
+                    evaluationText = evaluationText.concat(someClaim.text.toLowerCase(), ". ");
+                    evaluationText = evaluationText.concat(composeArgumentation(diagram, someClaim, false), "\n\n");
+                } else {
+                    // A case is linked, use complex evaluation
+                    evaluationText = evaluationText.concat(someClaim.caseInformation.toLowerCase(), ". ");
+                    evaluationText = evaluationText.concat(composeArgumentation(diagram, someClaim, true), "\n\n");
+                }
+
+                return evaluationText;
+            }
+
             // Compose the argumentation part of the output evaluation text by going through all claims that support
             // a concluding claim.
             function composeArgumentation(diagram, someClaim, complex) { // ADDED
@@ -2275,10 +2297,10 @@
                         allClaims.splice(allClaims.indexOf(satisfiedDisjunctiveClaims[0].text.toLowerCase()), 1);
                     } else if (satisfiedConjunctiveClaims.length > 0) {
                         argumentationText = argumentationText.concat(satisfiedConjunctiveClaims[0], ". ", satisfiedConjunctiveConclusionPhrase);
-                        let relevantConjunctiveClaims = findRelevantConjunctiveClaims(diagram, someClaim);
+                        let relevantConjunctiveClaims = findRelevantConjunctiveClaims(diagram, someClaim, true);
                         relevantConjunctiveClaims.forEach(conjunctiveClaim => {
                             determiningClaims.push(conjunctiveClaim);
-                            allClaims.splice(allClaims.indexOf(conjunctiveClaim.text), 1);
+                            allClaims.splice(allClaims.indexOf(conjunctiveClaim.text.toLowerCase()), 1);
                         });
                     }
                     // Explain that the rest is irrelevant
@@ -2319,11 +2341,16 @@
                             determiningClaims.push(unsatisfiedDisjunctiveClaims[i]);
                         } else {
                             argumentationText = argumentationText.concat(unsatisfiedConjunctiveClaims[i - unsatisfiedDisjunctiveClaims.length], ". ");
+                            determiningClaims = determiningClaims.concat(findRelevantConjunctiveClaims(diagram, someClaim, false));
                         }
                     }
                 }
 
-                alert(determiningClaims[0].text);
+                determiningClaims.forEach(determiningClaim => {
+                    if (diagram.findInfluencedClaims().includes(determiningClaim)) {
+                        argumentationText = argumentationText.concat("\n\n", composeAdditionalEvaluationText(diagram, determiningClaim));
+                    }
+                });
 
                 return argumentationText;
             }
@@ -2344,21 +2371,43 @@
                 return underlyingClaims
             }
 
-            function findRelevantConjunctiveClaims(diagram, someClaim) {
+            function findRelevantConjunctiveClaims(diagram, someClaim, satisfying) {
                 let relevantConjunctiveClaims = [];
-                let relations = diagram.findRelations([{target: someClaim}]); // all these relations need to be satisfied for the conclusion to be satisfied
-                let conjunctiveTarget;
+                let relations = diagram.findRelations([{target: someClaim}]);
+                let conjunctiveTargets = [];
                 let i;
-                for (i = 0; i < relations.length; i++) {
+                for (i = 0; i < relations.length; i++) { // only finds one conjunction
                     if (relations[i].claim.text === "&") {
-                        conjunctiveTarget = relations[i].claim;
-                        break;
+                        conjunctiveTargets.push(relations[i].claim);
                     }
                 }
-                let underlyingRelations = diagram.findRelations([{target: conjunctiveTarget}]);
-                underlyingRelations.forEach(relation => {
-                    relevantConjunctiveClaims.push(relation.claim);
-                });
+                for (i = 0; i < conjunctiveTargets.length; i++) { // go through all conjunctions
+                    let underlyingClaims = [];
+                    let underlyingRelations = diagram.findRelations([{target: conjunctiveTargets[i]}]);
+                    underlyingRelations.forEach(relation => {
+                        underlyingClaims.push(relation.claim);
+                    });
+                    if (satisfying) { // find conjunctive claims that together support, and find only the first
+                        let support = true;
+                        underlyingClaims.forEach(underlyingClaim => {
+                            if (!(underlyingClaim.satisfaction === "yes")) {
+                                support = false;
+                            }
+                        });
+                        if (support === true) { // the conjunctive claims together support
+                            relevantConjunctiveClaims = relevantConjunctiveClaims.concat(underlyingClaims);
+                            break;
+                        }
+                    } else { // find conjunctive claims that do not together support, and find all
+                        for (let i = 0; i < underlyingClaims.length; i++){
+                            let underlyingClaim = underlyingClaims[i];
+                            if (!(underlyingClaim.satisfaction === "yes")) {
+                                relevantConjunctiveClaims.push(underlyingClaim);
+                                break;
+                            }
+                        }
+                    }
+                }
                 return relevantConjunctiveClaims;
             }
 
