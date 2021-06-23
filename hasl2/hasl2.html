@@ -848,7 +848,7 @@
                     }
                 }
 
-                onDoubleClick(e) {
+                onDoubleClick(e) { // ADDED
                     const cursor = {
                         x: e.offsetX - this.style.padding.left,
                         y: e.offsetY - this.style.padding.top,
@@ -856,17 +856,20 @@
 
                     let claim = this.findClaimAtPosition(cursor);
 
-                    const text = prompt('Text of claim:', claim ? claim.text : '');
+                    if (!(this.findInfluencedClaims().includes(claim))) {
+                        if (claim.satisfaction === "no") {
+                            claim.setSatisfaction("yes");
+                        } else {
+                            claim.setSatisfaction("no");
 
-                    if (!text)
-                        return;
-
-                    if (!claim) {
-                        claim = this.addClaim(text);
-                        claim.setPosition(cursor.x, cursor.y);
-                    } else {
-                        claim.text = text;
+                        }
+                        e.preventDefault();
+                        this.update();
+                        this.updateInfluencedClaims(claim);
+                        e.preventDefault();
+                        this.update();
                     }
+
                 }
 
                 onMouseMove(e) {
@@ -1051,30 +1054,6 @@
                             this.update();
                             break;
 
-                        case 86: // v ADDED
-                            this.selectedClaims.forEach(claim => {
-                                if (!(this.findInfluencedClaims().includes(claim))) {
-                                    claim.setSatisfaction("yes");
-                                    e.preventDefault();
-                                    this.update();
-                                    this.updateInfluencedClaims(claim);
-                                    e.preventDefault();
-                                    this.update();
-                                }
-                            });
-                            break;
-                        case 78: // n ADDED
-                            this.selectedClaims.forEach(claim => {
-                                if (!(this.findInfluencedClaims().includes(claim))) {
-                                    claim.setSatisfaction("no");
-                                    e.preventDefault();
-                                    this.update();
-                                    this.updateInfluencedClaims(claim);
-                                    e.preventDefault();
-                                    this.update();
-                                }
-                            });
-                            break;
                         case 65: // a ADDED
                             this.selectedClaims.forEach(claim => {
                                 claim.caseInformation = prompt("Matching case information:", claim.caseInformation);
@@ -1762,7 +1741,7 @@
 			const diagramPanel = new TabPanel(document.getElementById('diagram-panel'));
 
 			function createRealisation(text, n) {
-				const tab = realisationPanel.createTab('Realisation' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
+				const tab = realisationPanel.createTab('Rule of law' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
 				const textarea = document.createElement('textarea');
 				textarea.placeholder = 'Type your argumentative text here…';
 				textarea.value = text || '';
@@ -1774,7 +1753,7 @@
 			}
 
             function createEvaluation(text, n) { {# ADDED #}
-                const tab = evaluationPanel.createTab('Evaluation' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
+                const tab = evaluationPanel.createTab('Evaluation');
                 const textarea = document.createElement('textarea');
                 {#textarea.placeholder = 'Type your argumentative text here…';#}
                 textarea.value = text || '';
@@ -1786,7 +1765,7 @@
             }
 
 			function createDiagram(diagram, n) {
-				let tab = diagramPanel.createTab('Parse ' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
+				let tab = diagramPanel.createTab('Rule of law diagram');
 
 				let canvas = document.createElement('canvas');
 				tab.appendChild(canvas);
@@ -1794,9 +1773,8 @@
 				let hint = document.createElement('p');
 				hint.className = 'hint';
 				hint.innerHTML = [
-					'Double click to create a new claim',
-					'<key>alt</key> + click to create a support relation',
-					'<key>alt</key> + <key>shift</key> + click to create an attack relation',
+					'Double click to satisfy/unsatisfy a condition ',
+					'<key>alt</key> + click on a claim to match case information ',
 				].join('<br>');
 				tab.appendChild(hint);
 
@@ -2149,7 +2127,7 @@
 
                 if (complex) {
                     // A case is linked, so first state the law for clarification
-                    argumentationText = argumentationText.concat("After all, ", realisationPanel.selectedTab.querySelector('textarea').value.toLowerCase(), " ");
+                    argumentationText = argumentationText.concat("After all, ", composeLawRepetition(diagram, someClaim), ". ");
                 }
 
                 // arrays of strings
@@ -2167,15 +2145,6 @@
                             unsatisfiedConjunctiveClaims.push(composeConjunctiveArgumentation(diagram, relation.claim, complex));
                         }
                     } else { // underlying claim is independent (disjunction)
-                        let satisfactionPhrase = "";
-                        let unsatisfactionPhrase = "";
-                        if (complex) {
-                            satisfactionPhrase = "it has been proven that ";
-                            unsatisfactionPhrase = "it has not been proven that";
-                        } else {
-                            satisfactionPhrase = "it is true that ";
-                            unsatisfactionPhrase = "it is not true that ";
-                        }
                         if (relation.claim.satisfaction === "yes") {
                             satisfiedDisjunctiveClaims.push(relation.claim);
                         } else {
@@ -2184,6 +2153,44 @@
                     }
                  });
                 return argumentationText.concat(writeOutArgumentation(diagram, satisfiedConjunctiveClaims, unsatisfiedConjunctiveClaims, satisfiedDisjunctiveClaims, unsatisfiedDisjunctiveClaims, someClaim, complex));
+            }
+
+            function composeLawRepetition(diagram, someClaim) {
+                let argumentText = someClaim.text.toLowerCase();
+                let relations = diagram.findRelations([{target: someClaim}]);
+                let allClaims = [];
+                relations.forEach(relation => {
+                    allClaims.push(relation.claim);
+                });
+                let linkingWord = "";
+                let i;
+                for (i = 0; i < allClaims.length; i++) {
+                    if (i === 0) {
+                        linkingWord = " if ";
+                    } else if (i === (allClaims.length - 1)) {
+                        linkingWord = " or if ";
+                    } else {
+                        linkingWord = ", if "
+                    }
+                    argumentText = argumentText.concat(linkingWord);
+                    if (allClaims[i].text === '&') { // underlying claim is a conjunction of claims
+
+                        let conjunctiveLinkingWord = "";
+                        let conjunctiveRelations = diagram.findRelations([{target: allClaims[i]}]);
+                        let j;
+                        for (j = 0; j < conjunctiveRelations.length; j++) {
+                            if (j === 0) {
+                                conjunctiveLinkingWord = "";
+                            } else {
+                                conjunctiveLinkingWord = " and ";
+                            }
+                            argumentText = argumentText.concat(conjunctiveLinkingWord, conjunctiveRelations[j].claim.text.toLowerCase());
+                        }
+                    } else { // underlying claim is independent (disjunction)
+                        argumentText = argumentText.concat(allClaims[i].text.toLowerCase());
+                    }
+                }
+                return argumentText
             }
 
             // Find out if a conjunction satisfied (i.e. if all of the underlying claims are satisfied)
