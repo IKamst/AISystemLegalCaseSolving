@@ -18,7 +18,7 @@ def diagram_to_texts(diagram):
 		for realisation in reverse(tree):
 			yield realisation
 
-def diagram_to_evaluations(diagram): # ADDED
+def diagram_to_evaluations(diagram):
 	for tree in Diagram.from_object(diagram).to_evaluations():
 		for evaluation in reverse(tree):
 			yield evaluation

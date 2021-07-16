@@ -220,7 +220,7 @@ class Diagram(object):
 		if len(top_warrants) > 0:
 			yield top_warrants
 
-	def to_evaluations(self) -> List[Argument]: # ADDED
+	def to_evaluations(self) -> List[Argument]:
 		# TODO: split up the argument into multiple arguments
 		yield tuple(self.to_argument(claim) for claim in self.find_roots())
 

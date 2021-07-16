@@ -162,23 +162,15 @@
 		<nav class="navbar navbar-default">
 			<div class="container">
 				<div class="navbar-header">
-					<a class="navbar-brand" href="/" title="Human Argument Structure Language">HASL/2</a>
-				</div>
-				<div class="navbar-left">
-					<ul class="nav navbar-nav">
-						<li><a href="http://hasl1.ikhoefgeen.nl/">HASL/1</a></li>
-						<li><a href="https://github.com/jelmervdl/moriarty">Github</a></li>
-					</ul>
+					<a class="navbar-brand" href="/" title="Evaluate a legal case">Evaluate a legal case</a>
 				</div>
 				<div class="btn-group navbar-btn">
-					<button class="btn btn-default" id="diagram-to-text-btn" accesskey="f"><span class="glyphicon glyphicon-arrow-left"></span> <strong>Formulate</strong> diagram as text</button>
-					<button class="btn btn-default" id="text-to-diagram-btn" accesskey="c"><span class="glyphicon glyphicon-arrow-right"></span> <strong>Comprehend</strong> text as diagram</button>
-				</div>
-				<div class="btn-group navbar-btn navbar-right">
-					<button class="btn btn-default" id="load-diagram-btn" accesskey="l"><strong>Load</strong> diagram</button>
-					<button class="btn btn-default" id="save-diagram-btn" accesskey="s"><strong>Save</strong> diagram</button>
+					<button class="btn btn-default" id="text-to-diagram-btn" accesskey="c"><span class="glyphicon glyphicon-arrow-right"></span> <strong>Comprehend</strong> rule of law as diagram</button>
 				</div> <br>
-                <div class="btn-group navbar-btn navbar-bottom"> {# ADDED #}
+				<div class="btn-group navbar-btn navbar-right">
+					<button class="btn btn-default" id="load-diagram-btn" accesskey="l"><strong>Info</strong></button>
+				</div> <br>
+                <div class="btn-group navbar-btn navbar-bottom">
                     <button class="btn btn-default" id="evaluate-btn" accesskey="l"><strong>Evaluate</strong></button>
                 </div>
 			</div>
@@ -190,7 +182,7 @@
 						<button id="add-realisation-tab" title="New text panel">+</button>
 					</ol>
 				</div>
-                <div id="evaluation-panel" class="evaluations" style="border-top:1px solid #ccc"> {# ADDED #}
+                <div id="evaluation-panel" class="evaluations" style="border-top:1px solid #ccc">
                     <ol class="tab-list">
                         <button id="add-evaluation-tab" title="New evaluation panel">+</button>
                     </ol>
@@ -207,8 +199,7 @@
 		<script src="https://unpkg.com/@webcomponents/custom-elements@1.0.6/custom-elements.min.js"></script>
 		<script src="/static/js/canvas.js"></script>
 		<script src="/static/js/array.js"></script>
-{#		<script src="/static/js/graph.js"></script>#}
-        <script> // INCLUDED FROM ^
+        <script>
             var _requestAnimationFrame = (function() {
                 if (typeof window !== 'undefined' && 'requestAnimationFrame' in window)
                     return function(callback) {
@@ -309,8 +300,8 @@
                     this.graph = graph;
                     this._text = text;
                     this.data = data || {};
-                    this.satisfaction = "no"; // ADDED
-                    this.caseInformation = ""; // ADDED
+                    this.satisfaction = "no";
+                    this.caseInformation = "";
                     this.caseLines = null;
                     this.ax = 0;
                     this.ay = 0;
@@ -325,7 +316,7 @@
                     this.ay = y;
                 }
 
-                setSatisfaction(newSatisfaction) { // ADDED
+                setSatisfaction(newSatisfaction) {
                     this.satisfaction = newSatisfaction;
                 }
 
@@ -480,7 +471,6 @@
                 }
             }
 
-
             class Graph {
                 constructor(canvas) {
                     this.canvas = canvas;
@@ -546,7 +536,7 @@
                             fontSize: 13,
                             lineHeight: 16,
                             maxWidth: 300,
-                            background: function(claim) { // ADDED (changed)
+                            background: function(claim) {
                                 if (claim.satisfaction == "yes") {
                                     return 'lightgreen';
                                 }
@@ -584,12 +574,6 @@
                             }
                         }
                     };
-
-                    // this.input = document.createElement('input');
-                    // this.input.type = 'text';
-                    // this.input.style.position = 'absolute';
-                    // this.input.style.display = 'none';
-                    // this.canvas.parentNode.appendChild(this.input);
 
                     if (typeof window !== 'undefined' && 'addEventListener' in window)
                         window.addEventListener('resize', this.resize.bind(this));
@@ -678,7 +662,7 @@
                 }
 
                 // Find all claims that have no influence on any other claims
-                findConcludingClaims() { // ADDED
+                findConcludingClaims() {
                     let concludingClaims = [];
                     let broken = false;
                     for (const [claimIndex, claimEl] of this.claims.entries()) {
@@ -697,7 +681,7 @@
                 }
 
                 // Find all claims that are influenced by other claims
-                findInfluencedClaims() { // ADDED, for now includes "&" claims
+                findInfluencedClaims() {
                     let influencedClaims = [];
                     this.claims.forEach(someClaim => { // go through all claims
                         if (this.findRelations([{target: someClaim}]).length > 0) {
@@ -708,7 +692,7 @@
                 }
 
                 // When a claim's satisfaction changes, go through relevant claims and see if they are influenced
-                updateInfluencedClaims(claim) { // ADDED
+                updateInfluencedClaims(claim) {
 
                     // Find out which claims are influenced by the claim and therefore relevant
                     let relevantRelations = this.findRelations([{claim: claim}]);
@@ -848,7 +832,7 @@
                     }
                 }
 
-                onDoubleClick(e) { // ADDED
+                onDoubleClick(e) {
                     const cursor = {
                         x: e.offsetX - this.style.padding.left,
                         y: e.offsetY - this.style.padding.top,
@@ -868,7 +852,10 @@
                         this.updateInfluencedClaims(claim);
                         e.preventDefault();
                         this.update();
+                    } else {
+                        alert('Select a condition that is not supported by any condition in order to satisfy/unsatisfy');
                     }
+
 
                 }
 
@@ -895,15 +882,6 @@
                             this.elementUnderCursor = elementUnderCursor;
                         }
 
-                        if (e.altKey) {
-                            this.cursor = {
-                                x: cursor.x,
-                                y: cursor.y,
-                                type: e.shiftKey ? Relation.ATTACK : Relation.SUPPORT
-                            };
-
-                            this.update();
-                        }
                     } else {
                         const delta = {
                             x: e.offsetX - this.dragStartPosition.x,
@@ -937,31 +915,16 @@
                         const claim = this.findClaimAtPosition(cursor);
                         const relation = claim ? null : this.findRelationAtPosition(cursor, 5);
 
-                        if (e.altKey) {
-                            if (this.selectedClaims.length > 0) {
-                                if (claim) {
-                                    this.addRelation(
-                                        this.selectedClaims[0],
-                                        claim,
-                                        e.shiftKey ? Relation.ATTACK : Relation.SUPPORT);
-                                } else if (relation) {
-                                    this.addRelation(
-                                        this.selectedClaims[0],
-                                        relation,
-                                        e.shiftKey ? Relation.ATTACK : Relation.SUPPORT);
-                                }
-                            }
+                        if (claim || relation) {
+                            this.fire('click', {target: claim || relation})
                         } else {
-                            if (claim || relation) {
-                                this.fire('click', {target: claim || relation})
-                            } else {
-                                if (this.selectedClaims.length != 0 || this.selectedRelations.length != 0) {
-                                    this.selectedClaims = [];
-                                    this.selectedRelations = [];
-                                    this.update();
-                                }
+                            if (this.selectedClaims.length != 0 || this.selectedRelations.length != 0) {
+                                this.selectedClaims = [];
+                                this.selectedRelations = [];
+                                this.update();
                             }
                         }
+
                     }
                     else if (this.selectedClaims.length > 0) {
                         this.selectedClaims.forEach(claim => {
@@ -988,14 +951,6 @@
                     const stepSize = 2 * this.style.scale;
 
                     switch (e.keyCode) {
-                        case 8: // Backspace
-                        case 46: // Delete
-                         	this.selectedClaims.forEach(claim => claim.delete());
-                         	this.selectedRelations.forEach(relation => relation.delete());
-                         	e.preventDefault();
-                         	this.update();
-                         	break;
-
                         case 9: // Capture [tab] key
                             // If there are no claims, there is nothing to move focus to
                             if (this.claims.length === 0)
@@ -1054,12 +1009,17 @@
                             this.update();
                             break;
 
-                        case 65: // a ADDED
+                        case 65: // a
                             this.selectedClaims.forEach(claim => {
-                                claim.caseInformation = prompt("Matching case information:", claim.caseInformation);
+                                let input = prompt("Matching case information:", claim.caseInformation);
+                                if (input !== null) {
+                                    claim.caseInformation = input;
+                                }
                                 e.preventDefault();
                                 this.update();
                             });
+                            e.preventDefault();
+                            this.update();
                             break;
                     }
                 }
@@ -1143,36 +1103,22 @@
                     this.context.font = (this.style.scale * this.style.claim.fontSize) + 'px sans-serif';
 
                     this.claims.forEach(claim => {
-                        if (!Array.isArray(claim.lines)) { // Hoezo dit in if statement?
+                        if (!Array.isArray(claim.lines)) {
                             claim.lines = this.context.wrapText(claim.text, this.style.claim.maxWidth);
                         }
 
-                        claim.caseLines = this.context.wrapText(claim.caseInformation, this.style.claim.maxWidth); // ADDED
+                        claim.caseLines = this.context.wrapText(claim.caseInformation, this.style.claim.maxWidth);
 
                         if (claim.data.compound) {
                             claim.width = 0;
                             claim.height = 0;
                         } else {
                             let textWidth = claim.lines.map(line => this.context.measureText(line).width).max();
-                            let alternativeTextWidth = claim.caseLines.map(line => this.context.measureText(line).width).max(); // ADDED
-                            textWidth = Math.max(textWidth, alternativeTextWidth); // ADDED
+                            let alternativeTextWidth = claim.caseLines.map(line => this.context.measureText(line).width).max();
+                            textWidth = Math.max(textWidth, alternativeTextWidth);
                             claim.width = textWidth / this.style.scale + this.style.claim.padding.left + this.style.claim.padding.right;
-                            claim.height = (claim.lines.length + claim.caseLines.length + 0.5) * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom; // ADDED claim.height = claim.lines.length * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom;
+                            claim.height = (claim.lines.length + claim.caseLines.length + 0.5) * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom;
                         }
-
-                        {#if (claim.width === null || claim.height === null) {#}
-                        {#    if (claim.data.compound) {#}
-                        {#        claim.width = 0;#}
-                        {#        claim.height = 0;#}
-                        {#    } else {#}
-                        {#        let textWidth = claim.lines.map(line => this.context.measureText(line).width).max();#}
-                        {#        let alternativeTextWidth = claim.caseLines.map(line => this.context.measureText(line).width).max(); // ADDED#}
-                        {#        textWidth = Math.max(textWidth, alternativeTextWidth); // ADDED#}
-                        {#        claim.width = textWidth / this.style.scale + this.style.claim.padding.left + this.style.claim.padding.right;#}
-                        {#        claim.height = (claim.lines.length + claim.caseLines.length + 0.5) * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom; // ADDED claim.height = claim.lines.length * this.style.claim.lineHeight + this.style.claim.padding.top + this.style.claim.padding.bottom;#}
-                        {#    }#}
-                        {# }#}
-
                     });
                 }
 
@@ -1183,15 +1129,6 @@
                 draw() {
                     // Update the size of all the claim boxes
                     this.updateClaimSizes();
-
-                    {#this.claims.forEach(claim => {#}
-                    {#    if (claim.caseInformation !== "") {#}
-                    {#        claim.setSatisfaction("no");#}
-                    {#    }#}
-                    {#    if (claim.caseLines.length > 1) {#}
-                    {#        claim.setSatisfaction("yes");#}
-                    {#    }#}
-                    {# })#}
 
                     // Make sure all the boxes will fit inside the canvas
                     this.updateCanvasSize();
@@ -1305,14 +1242,19 @@
 
                         // Draw the border
                         ctx.strokeStyle = claimBorder(claim);
-                        ctx.lineWidth = scale * 1;
+                        if (claim.satisfaction === "yes") {
+                            ctx.lineWidth = scale * 4;
+                        } else {
+                            ctx.lineWidth = scale * 1;
+                        }
+
                         ctx.strokeRect(
                             scale * claim.x,
                             scale * claim.y,
                             scale * claim.width,
                             scale * claim.height);
 
-                        // Draw another border ADDED
+                        // Draw another border
                         ctx.strokeStyle = claimBorder(claim);
                         ctx.lineWidth = scale * 1;
                         ctx.strokeRect(
@@ -1332,7 +1274,7 @@
                                 scale * (claim.y + padding.top + (i + 1) * lineHeight));
                         });
 
-                        // Draw case information ADDED!
+                        // Draw case information
                         ctx.fillStyle = 'dimgrey';
                         claim.caseLines.forEach(function(line, i) {
                             ctx.fillText(line,
@@ -1536,11 +1478,6 @@
                         y: target.y + (D.y / D.x) * (target.x > source.x ? -0.5 : 0.5) * target.width
                     };
 
-                    // console.log(
-                    // 	D.x / D.y * target.height < -0.5 * target.width,
-                    // 	D.y / D.x * target.width < -0.5 * target.height
-                    // );
-
                     if ((D.x / D.y < target.width / target.height)
                         && !(D.x / D.y * target.height < -0.5 * target.width))
                         t = {
@@ -1736,14 +1673,14 @@
 
 			const realisationPanel = new TabPanel(document.getElementById('realisation-panel'));
 
-			const evaluationPanel = new TabPanel(document.getElementById('evaluation-panel')); {# ADDED #}
+			const evaluationPanel = new TabPanel(document.getElementById('evaluation-panel'));
 
 			const diagramPanel = new TabPanel(document.getElementById('diagram-panel'));
 
 			function createRealisation(text, n) {
 				const tab = realisationPanel.createTab('Rule of law' + (n !== undefined ? (' ' + (n + 1).toString()) : ''));
 				const textarea = document.createElement('textarea');
-				textarea.placeholder = 'Type your argumentative text here…';
+				textarea.placeholder = 'Type your rule of law here...';
 				textarea.value = text || '';
 				tab.appendChild(textarea);
 				sentenceList.then(list => {
@@ -1752,15 +1689,11 @@
 				return tab;
 			}
 
-            function createEvaluation(text, n) { {# ADDED #}
+            function createEvaluation(text, n) {
                 const tab = evaluationPanel.createTab('Evaluation');
                 const textarea = document.createElement('textarea');
-                {#textarea.placeholder = 'Type your argumentative text here…';#}
                 textarea.value = text || '';
                 tab.appendChild(textarea);
-                {#sentenceList.then(list => {#}
-                {#    tab.appendChild(list.cloneNode(true));#}
-                {# });#}
                 return tab;
             }
 
@@ -1774,7 +1707,7 @@
 				hint.className = 'hint';
 				hint.innerHTML = [
 					'Double click to satisfy/unsatisfy a condition ',
-					'<key>alt</key> + click on a claim to match case information ',
+					'select a claim and press <key>a</key> to match case information ',
 				].join('<br>');
 				tab.appendChild(hint);
 
@@ -1967,101 +1900,7 @@
 				diagramPanel.clear();
 			});
 
-			document.getElementById('diagram-to-text-btn').addEventListener('click', e => {
-				let diagram = diagramPanel.selectedTab.diagram;
-
-				let sequence = 0;
-
-				function id(obj) {
-					if (!('id' in obj))
-						obj.id = sequence++;
-					return obj.id;
-				}
-
-				function ref(obj) {
-					let type = null;
-
-					if (obj instanceof Claim)
-						type = 'claim';
-					else if (obj instanceof Relation)
-						type = 'relation';
-					else
-						throw new Error('Unknown type');
-
-					if (obj.data.compound)
-						throw new Error('Trying to refer to implementation-artifact compound claim');
-
-					return {isa: type, id: id(obj)};
-				}
-
-				// Reset sequence to the maximum ID we already encountered
-				sequence = diagram.claims.concat(diagram.relations).reduce((max, obj) => {
-					return 'id' in obj ? Math.max(obj.id) : max
-				}, 0) + 1;
-
-				let json = {
-					isa: 'diagram',
-					claims: diagram.claims
-						.filter(claim => !claim.data.compound)
-						.map(claim => ({
-							isa: 'claim',
-							id: id(claim),
-							text: claim.text
-						})),
-					relations: diagram.relations.reduce((acc, relation) => {
-						if (relation.target.data.compound)
-							return acc;
-
-						return acc.concat([
-							{
-								isa: 'relation',
-								id: id(relation),
-								sources: relation.data.merged
-									? diagram.relations
-										.filter(rel => rel.target === relation.claim)
-										.map(rel => rel.claim)
-										.map(ref)
-									: [ref(relation.claim)],
-								target: ref(relation.target),
-								type: relation.type
-							}
-						]);
-					}, [])
-				};
-
-				let request = fetch('/api/text', {
-					method: 'POST',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						'diagram': json
-					})
-				});
-
-				let data = request.then(resp => resp.json());
-
-				// If there is an error, print it
-				data.then(json => {
-					if (json.error)
-						alert(json.error);
-				});
-
-				// If there are realisations, print realisation
-				data.then(json => {
-					if (json.texts)
-						json.texts.map(createRealisation)[0].querySelector('textarea').focus();
-
-					if (json.more)
-						alert('There are more formulations, but only the first 50 are shown.');
-				});
-
-				// Clear the current one
-				realisationPanel.clear();
-			});
-
-            document.getElementById('evaluate-btn').addEventListener('click', e => { {# ADDED #}
+            document.getElementById('evaluate-btn').addEventListener('click', e => {
                 let diagram = diagramPanel.selectedTab.diagram;
                 let complexEvaluation = true;
                 let evaluationText = composeEvaluationText(diagram);
@@ -2075,7 +1914,7 @@
 
             // Compose the output evaluation text by going through all concluding claims and finding argumentation for
             // their satisfaction.
-            function composeEvaluationText(diagram) { // ADDED
+            function composeEvaluationText(diagram) {
                 let evaluationText = "";
 
                 diagram.findConcludingClaims().forEach(someClaim => {
@@ -2122,7 +1961,7 @@
 
             // Compose the argumentation part of the output evaluation text by going through all claims that support
             // a concluding claim.
-            function composeArgumentation(diagram, someClaim, complex) { // ADDED
+            function composeArgumentation(diagram, someClaim, complex) {
                 let argumentationText = "";
 
                 if (complex) {
@@ -2252,7 +2091,7 @@
                     for (i = 0; i < satisfiedClaims.length; i++) {
                         if (i === 0) {
                             if (complex) {
-                                argumentationText = argumentationText.concat("it is true that ", satisfiedClaims[i].text.toLowerCase(), ", after all ", satisfiedClaims[i].caseInformation.toLowerCase(), ", ");
+                                argumentationText = argumentationText.concat("it is true that ", satisfiedClaims[i].text.toLowerCase(), ", after all ", satisfiedClaims[i].caseInformation.toLowerCase());
                             } else {
                                 argumentationText = argumentationText.concat("it is true that ", satisfiedClaims[i].text.toLowerCase());
                             }
@@ -2264,7 +2103,7 @@
                             }
                         } else {
                             if (complex) {
-                                argumentationText = argumentationText.concat(", that ", satisfiedClaims[i].text.toLowerCase(), ", after all ", satisfiedClaims[i].caseInformation.toLowerCase(), ", ");
+                                argumentationText = argumentationText.concat(", that ", satisfiedClaims[i].text.toLowerCase(), ", after all ", satisfiedClaims[i].caseInformation.toLowerCase());
                             } else {
                                 argumentationText = argumentationText.concat(", that ", satisfiedClaims[i].text.toLowerCase());
                             }
@@ -2418,54 +2257,26 @@
                 return relevantConjunctiveClaims;
             }
 
-			document.getElementById('save-diagram-btn').addEventListener('click', e => {
-				if (!diagramPanel.selectedTab)
-					return;
-
-				let diagram = diagramPanel.selectedTab.diagram;
-				showPrompt('Diagram', diagram.toString());
-			});
-
 			document.getElementById('load-diagram-btn').addEventListener('click', e => {
-				showPrompt('Paste HASL diagram syntax here', '').then(text => {
-					let canvas = document.createElement('canvas');
-					canvas.width = 600;
-					canvas.height = 600;
 
-					let graph = new Graph(canvas);
-
-					try {
-						graph.parse(text);
-
-						let title = 'Loaded ' + new Date().toLocaleTimeString();
-
-						const roots = graph.findRootClaims();
-						if (roots.length === 1)
-							title = roots[0].text;
-
-						let tab = diagramPanel.createTab(title);
-						tab.diagram = graph;
-						tab.appendChild(canvas);
-						tab.addEventListener('show', graph.draw.bind(graph));
-
-						if (graph.claims.every(claim => claim.x === 0 && claim.y === 0))
-							graph.layout().apply();
-						else
-							graph.positionClaims();
-
-						graph.fit();
-						canvas.focus();
-					} catch (e) {
-						alert(e);
-					}
-				});
-			});
+                alert("An AI system for the semi-automatic solving of legal cases"
+                    + "\n" + "\n" + "Solve legal cases using this system in the following way:"
+                    + "\n" + "\n" + "Step 1: Choose a relevant rule of law in the ``Rule of law\" panel. Either select the rule of law from the list or type one yourself. Make sure that the rule of law is in simplified English according to the specified grammar."
+                    + "\n" + "\n" + "Step 2: Click ``Comprehend rule of law as diagram\" to let the system perform an automatic rule analysis. If no diagram emerges, then check if the rule of law in the ``Rule of law\" panel uses the specified grammar."
+                    + "\n" + "\n" + "Step 3: Match legal case information to each of the claims and indicate their satisfactions. For claims for which there is no matching legal case information, type ``There is no matching case information for this\"."
+                    + "\n" + "\n" + "Step 4: Click ``Evaluate\" to let the system come up with the legal conclusion and let it generate the legal case evaluation."
+                    );
+                alert("This system was created by Iris Kamsteeg as part of an Artificial Intelligence Bachelor's project at the Rijksuniversiteit Groningen. The project was supervised by Prof. Dr. B. Verheij. [ADD GIT] provides the code for this system."
+                    + "\n" + "\n" + "This system uses HASL/2 by Van der Linde to allow for the rule analysis and the evaluation of conditions. HASL/2 was also used as a basis for the user interface. https://github.com/jelmervdl/moriarty provides the code for HASL/2. For more explanation on HASL/2, see the paper ``Human Argument Structure Language\" by Van der Linde:"
+                    + "\n" + "\n" + "Van der Linde, J. (2018). Human Argument Structure Language. http://fse.studenttheses.ub.rug.nl/id/eprint/18544."
+                    );
+            });
 
 			document.getElementById('add-realisation-tab').addEventListener('click', e => {
 				createRealisation().querySelector('textarea').focus();
 			});
 
-            document.getElementById('add-evaluation-tab').addEventListener('click', e => { {# ADDED #}
+            document.getElementById('add-evaluation-tab').addEventListener('click', e => {
                 createEvaluation().querySelector('textarea').focus();
             });
 
@@ -2504,7 +2315,7 @@
 
 			createDiagram();
 
-			createEvaluation(); // ADDED
+			createEvaluation();
 
 		</script>
 	</body>
