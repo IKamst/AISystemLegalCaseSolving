@@ -6,3 +6,8 @@ The system was created by Iris Kamsteeg as a Bachelor's project at the Rijksuniv
 
 The system was based of HASL/2 by Van der Linde (https://github.com/jelmervdl/moriarty). The following files were modified:
 
+evaluation.tex
+hasl1/static/js/graph.js
+hasl2/diagram.py
+hasl2/hasl2.html
+hasl2/server.py
